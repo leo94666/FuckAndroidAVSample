@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/ijkplayer/android/contrib/ffmpeg-arm64" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ijkplayer/android/contrib/ffmpeg-armv5" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ijkplayer/android/contrib/ffmpeg-armv7a" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ijkplayer/android/contrib/ffmpeg-x86" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ijkplayer/android/contrib/ffmpeg-x86_64" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ijkplayer/android/contrib/x264" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ijkplayer/extra/ffmpeg" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ijkplayer/extra/x264" vcs="Git" />
+  </component>
+</project>

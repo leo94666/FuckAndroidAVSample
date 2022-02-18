@@ -1,0 +1,3 @@
+rootProject.name = "av"
+include ':app'
+include ':ffmpegLibrary422'

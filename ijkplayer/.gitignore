@@ -1,0 +1,4 @@
+extra
+android/contrib/build
+android/contrib/ffmpeg-*
+android/contrib/x264
