@@ -203,6 +203,7 @@ export LD=${FF_CROSS_PREFIX}-ld
 export AR=${FF_CROSS_PREFIX}-ar
 export STRIP=${FF_CROSS_PREFIX}-strip
 
+
 FF_CFLAGS="-O3 -Wall -pipe \
     -std=c99 \
     -ffast-math \
@@ -284,12 +285,15 @@ cd $FF_SOURCE
 if [ -f "./config.h" ]; then
     echo 'reuse configure'
 else
+    echo "\033[31m ---------------------------------------------------------- \033[0m"
     which $CC
+    echo "\033[31m ---------------------------------------------------------- \033[0m"
     echo "configurate ffmpeg FF_CFG_FLAGS: ${FF_CFG_FLAGS}"
     echo "configurate ffmpeg FF_CFLAGS: ${FF_CFLAGS}"
     echo "configurate ffmpeg FF_EXTRA_CFLAGS: ${FF_EXTRA_CFLAGS}"
     echo "configurate ffmpeg FF_DEP_LIBS: ${FF_DEP_LIBS}"
     echo "configurate ffmpeg FF_EXTRA_LDFLAGS: ${FF_EXTRA_LDFLAGS}"
+    echo "\033[31m ---------------------------------------------------------- \033[0m"
 
     ./configure $FF_CFG_FLAGS \
         --extra-cflags="$FF_CFLAGS $FF_EXTRA_CFLAGS" \
@@ -305,8 +309,8 @@ echo "--------------------"
 cp config.* $FF_PREFIX
 make $FF_MAKE_FLAGS >/dev/null
 make install
-mkdir -p $FF_PREFIX/include/libffmpeg
-cp -f config.h $FF_PREFIX/include/libffmpeg/config.h
+#mkdir -p $FF_PREFIX/include/libffmpeg
+cp -f config.h $FF_PREFIX/include/config.h
 
 #--------------------
 echo ""
@@ -367,11 +371,14 @@ for f in $FF_PREFIX/lib/pkgconfig/*.pc; do
     f=$FF_PREFIX/shared/lib/pkgconfig/$(basename $f)
     # OSX sed doesn't have in-place(-i)
     mysedi $f 's/\/output/\/output\/shared/g'
-    mysedi $f 's/-lavcodec/-lijkffmpeg/g'
-    mysedi $f 's/-lavfilter/-lijkffmpeg/g'
-    mysedi $f 's/-lavformat/-lijkffmpeg/g'
-    mysedi $f 's/-lavutil/-lijkffmpeg/g'
-    mysedi $f 's/-lswresample/-lijkffmpeg/g'
-    mysedi $f 's/-lswscale/-lijkffmpeg/g'
+    mysedi $f 's/-lavcodec/-lffmpeg/g'
+    mysedi $f 's/-lavdevice/-lffmpeg/g'
+    mysedi $f 's/-lswresample/-lffmpeg/g'
+    mysedi $f 's/-lavfilter/-lffmpeg/g'
+    mysedi $f 's/-lavformat/-lffmpeg/g'
+    mysedi $f 's/-lavutil/-lffmpeg/g'
+    mysedi $f 's/-lswscale/-lffmpeg/g'
+    mysedi $f 's/-lavresample/-lffmpeg/g'
+
 done
 echo "do-compile-ffmpeg.sh================================================================end"
