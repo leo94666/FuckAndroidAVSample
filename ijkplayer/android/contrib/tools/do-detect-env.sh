@@ -21,16 +21,16 @@ fi
 
 
 # try to detect NDK version
-export IJK_GCC_VER=4.9
-export IJK_GCC_64_VER=4.9
+export IJK_GCC_VER=4.9   ## GCC 版本
+export IJK_GCC_64_VER=4.9  ## 64位 GCC 版本
 export IJK_MAKE_TOOLCHAIN_FLAGS=
 export IJK_MAKE_FLAG=
-export IJK_NDK_REL=$(grep -o '^r[0-9]*.*' $ANDROID_NDK/RELEASE.TXT 2>/dev/null | sed 's/[[:space:]]*//g' | cut -b2-)
+
+export IJK_NDK_REL=$(grep -o '^r[0-9]*.*' $ANDROID_NDK/RELEASE.TXT 2>/dev/null | sed 's/[[:space:]]*//g' | cut -b2-) # 获取NDK版本
+
 case "$IJK_NDK_REL" in
     10e*)
-        # we don't use 4.4.3 because it doesn't handle threads correctly.
-        if test -d ${ANDROID_NDK}/toolchains/arm-linux-androideabi-4.8
-        # if gcc 4.8 is present, it's there for all the archs (x86, mips, arm)
+        if test -d ${ANDROID_NDK}/toolchains/arm-linux-androideabi-4.8   #文件存在并且是目录
         then
             echo "NDKr$IJK_NDK_REL detected"
 
@@ -43,7 +43,7 @@ case "$IJK_NDK_REL" in
                 ;;
             esac
         else
-            echo "You need the NDKr10e or later"
+            echo "You need the NDKr10e or later, 1"
             exit 1
         fi
     ;;
@@ -51,17 +51,26 @@ case "$IJK_NDK_REL" in
         IJK_NDK_REL=$(grep -o '^Pkg\.Revision.*=[0-9]*.*' $ANDROID_NDK/source.properties 2>/dev/null | sed 's/[[:space:]]*//g' | cut -d "=" -f 2)
         echo "IJK_NDK_REL=$IJK_NDK_REL"
         case "$IJK_NDK_REL" in
-            11*|12*|13*|14*|15*|16*|17*|18*|19*|20*)
-                if test -d ${ANDROID_NDK}/toolchains/arm-linux-androideabi-4.9
+            11*|12*|13*|14*|18*)
+                if test -d ${ANDROID_NDK}/toolchains/arm-linux-androideabi-4.9  #文件存在并且是目录
                 then
                     echo "NDKr$IJK_NDK_REL detected"
                 else
-                    echo "You need the NDKr10e or later"
+                    echo "You need the NDKr10e or later, 2"
+                    exit 1
+                fi
+            ;;
+            23*|24*)
+                if test -d ${ANDROID_NDK}/toolchains/llvm
+                then
+                    echo "NDKr$IJK_NDK_REL detected"
+                else
+                    echo "You need the NDKr10e or later, 3"
                     exit 1
                 fi
             ;;
             *)
-                echo "You need the NDKr10e or later"
+                echo "You need the NDKr10e or later, 4"
                 exit 1
             ;;
         esac
@@ -80,10 +89,20 @@ case "$UNAME_S" in
         echo "Cygwin temp prefix=$IJK_WIN_TEMP/"
     ;;
 esac
+<<<<<<< HEAD
 echo "IJK_GCC_VER=$IJK_GCC_VER"
 echo "IJK_GCC_64_VER=$IJK_GCC_64_VER"
 echo "IJK_MAKE_TOOLCHAIN_FLAGS=$IJK_MAKE_TOOLCHAIN_FLAGS"
 echo "IJK_MAKE_FLAG=$IJK_MAKE_FLAG"
 echo "IJK_NDK_REL=$IJK_NDK_REL"
+=======
+
+echo "IJK_GCC_VER ${IJK_GCC_VER}"
+echo "IJK_GCC_64_VER ${IJK_GCC_64_VER}"
+echo "IJK_MAKE_TOOLCHAIN_FLAGS ${IJK_MAKE_TOOLCHAIN_FLAGS}"
+echo "IJK_MAKE_FLAG ${IJK_MAKE_FLAG}"
+echo "IJK_NDK_REL ${IJK_NDK_REL}"
+
+>>>>>>> 4a0165d387fc71c587747c3b2d119a21674a2b33
 
 echo "do-detect-env.sh================================================================end"

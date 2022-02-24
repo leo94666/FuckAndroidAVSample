@@ -21,6 +21,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${CMAKE_SOURCE_DIR}/../jnilibs/${ANDRO
 add_library(cmd   # 库名称
         SHARED             # 库类型
         cmd.cpp
+<<<<<<< HEAD
         ffmpeg.c
         fftools/cmdutils.c
         fftools/ffmpeg_cuvid.c
@@ -30,6 +31,8 @@ add_library(cmd   # 库名称
         fftools/ffmpeg_qsv.c
         fftools/ffmpeg_videotoolbox.c
 
+=======
+>>>>>>> 4a0165d387fc71c587747c3b2d119a21674a2b33
         )            # 编译进库的源码
 
 # 查找日志库

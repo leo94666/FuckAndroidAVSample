@@ -190,6 +190,8 @@ if [ ! -f "$FF_TOOLCHAIN_TOUCH" ]; then
     touch $FF_TOOLCHAIN_TOUCH  #touch命令主要用来修改文件时间戳，或者新建一个不存在的文件
     echo "--------------------make-standalone-toolchain---end"
 fi
+echo "FF_TOOLCHAIN_TOUCH ${FF_TOOLCHAIN_TOUCH}"
+echo "PATH $PATH"
 
 #--------------------
 echo ""
