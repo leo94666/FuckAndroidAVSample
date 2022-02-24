@@ -2,6 +2,11 @@
 ](https://blog.csdn.net/whbk101/article/details/101775032)
 
 
+
+https://www.jianshu.com/p/83e7177bb13f
+
+
+
 adb shell getprop ro.product.cpu.abi
 
 

@@ -14,10 +14,13 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-
-        ndk {
-            abiFilters 'armeabi-v7a'//,'arm64-v8a'//'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        externalNativeBuild {
+            cmake {
+                cppFlags '-std=c++11'
+                abiFilters 'armeabi-v7a'//'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            }
         }
+
     }
 
     buildTypes {
@@ -38,27 +41,7 @@ android {
         jvmTarget = '1.8'
     }
 
-//    flavorDimensions "non-free"
-//    productFlavors {
-//        free {
-//            dimension "non-free"
-//            buildConfigField "boolean", "LIB_X264_ENABLED", "false"
-//            externalNativeBuild {
-//                cmake {
-//                    arguments "-DLIB_X264_ENABLED:BOOL=OFF", "-DANDROID_ARM_NEON=ON"
-//                }
-//            }
-//        }
-//        nonFree {
-//            dimension "non-free"
-//            buildConfigField "boolean", "LIB_X264_ENABLED", "true"
-//            externalNativeBuild {
-//                cmake {
-//                    arguments '-DLIB_X264_ENABLED:BOOL=ON', "-DANDROID_ARM_NEON=ON"
-//                }
-//            }
-//        }
-//    }
+    ndkVersion = '20.0.5594570'
 
     externalNativeBuild {
         cmake {

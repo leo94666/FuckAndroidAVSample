@@ -207,7 +207,7 @@ export STRIP=${FF_CROSS_PREFIX}-strip
 
 
 FF_CFLAGS="-O3 -Wall -pipe \
-    -std=c99 \
+    -std=c11 \
     -ffast-math \
     -fstrict-aliasing -Werror=strict-aliasing \
     -Wno-psabi -Wa,--noexecstack \

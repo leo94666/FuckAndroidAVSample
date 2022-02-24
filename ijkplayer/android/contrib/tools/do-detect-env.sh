@@ -89,13 +89,7 @@ case "$UNAME_S" in
         echo "Cygwin temp prefix=$IJK_WIN_TEMP/"
     ;;
 esac
-<<<<<<< HEAD
-echo "IJK_GCC_VER=$IJK_GCC_VER"
-echo "IJK_GCC_64_VER=$IJK_GCC_64_VER"
-echo "IJK_MAKE_TOOLCHAIN_FLAGS=$IJK_MAKE_TOOLCHAIN_FLAGS"
-echo "IJK_MAKE_FLAG=$IJK_MAKE_FLAG"
-echo "IJK_NDK_REL=$IJK_NDK_REL"
-=======
+
 
 echo "IJK_GCC_VER ${IJK_GCC_VER}"
 echo "IJK_GCC_64_VER ${IJK_GCC_64_VER}"
@@ -103,6 +97,5 @@ echo "IJK_MAKE_TOOLCHAIN_FLAGS ${IJK_MAKE_TOOLCHAIN_FLAGS}"
 echo "IJK_MAKE_FLAG ${IJK_MAKE_FLAG}"
 echo "IJK_NDK_REL ${IJK_NDK_REL}"
 
->>>>>>> 4a0165d387fc71c587747c3b2d119a21674a2b33
 
 echo "do-detect-env.sh================================================================end"
