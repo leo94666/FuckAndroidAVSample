@@ -10,7 +10,7 @@ package com.top.ffmpeg;
 public class Cmd {
 
     static {
-        System.loadLibrary("ffmpeg");
+        System.loadLibrary("fftools");
         System.loadLibrary("cmd");
     }
 

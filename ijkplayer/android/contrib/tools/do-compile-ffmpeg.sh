@@ -39,7 +39,7 @@ FF_EXTRA_CFLAGS=
 FF_EXTRA_LDFLAGS=
 FF_DEP_LIBS=
 
-FF_MODULE_DIRS="compat libavcodec libavfilter libavformat libavutil libswresample libswscale"
+FF_MODULE_DIRS="compat libavcodec libavdevice libavfilter libavformat libavresample libavutil libpostproc libswresample libswscale"
 FF_ASSEMBLER_SUB_DIRS=
 
 #--------------------
