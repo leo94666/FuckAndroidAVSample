@@ -45,7 +45,7 @@ echo_nextstep_help() {
 case "$FF_TARGET" in
     "")
         echo_archs armv7a
-        sh tools/do-compile-ffmpeg.sh arm64
+        sh tools/do-compile-ffmpeg.sh armv7a
     ;;
     armv5|armv7a|arm64|x86|x86_64)
         echo_archs $FF_TARGET $FF_TARGET_EXTRA

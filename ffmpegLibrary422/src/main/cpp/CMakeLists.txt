@@ -19,7 +19,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${CMAKE_SOURCE_DIR}/../jnilibs/${ANDRO
 add_library(cmd   # 库名称
         SHARED             # 库类型
         cmd.cpp
-        ffmpeg.c)            # 编译进库的源码
+        )            # 编译进库的源码
 
 # 查找日志库
 find_library(
