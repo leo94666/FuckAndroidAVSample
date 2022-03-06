@@ -21,7 +21,9 @@
 
 #ifndef COMPAT_VA_COPY_H
 #define COMPAT_VA_COPY_H
+
 #include <stdarg.h>
+
 #if !defined(va_copy) && defined(_MSC_VER)
 #define va_copy(dst, src) ((dst) = (src))
 #endif
