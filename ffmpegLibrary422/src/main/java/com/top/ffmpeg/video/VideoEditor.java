@@ -47,7 +47,7 @@ public class VideoEditor {
         cmd.append("-i").append(videoPath);
         cmd.append("-vf");
         param.append("drawtext=");
-        param.append("text=").append(textWatermark).append(":").append("fontfile=/system/fonts/DroidSansMono.ttf").append(":fontsize=24:fontcolor=red");
+        param.append("text=").append(textWatermark).append(":").append("fontsize=56:x=(w-text_w)/2:y=(h-text_h)/2:").append("fontfile=/system/fonts/DroidSansMono.ttf").append(":fontsize=24:fontcolor=red");
         cmd.append(param.toString());
         cmd.append(outPath);
         execCmd(cmd, duration, listener);
