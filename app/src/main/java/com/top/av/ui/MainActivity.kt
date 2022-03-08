@@ -1,8 +1,6 @@
 package com.top.av.ui
 
-import android.os.Bundle
 import android.view.View
-import androidx.databinding.DataBindingUtil.setContentView
 import com.top.arch.base.BaseActivity
 import com.top.av.R
 import com.top.av.databinding.ActivityMainBinding
@@ -16,6 +14,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     }
 
     override fun getLayout(): Int {
+        setFullScreen()
         return R.layout.activity_main
     }
 

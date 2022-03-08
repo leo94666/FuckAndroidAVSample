@@ -5,7 +5,9 @@ buildscript {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-
+        maven {
+            url '/Users/liyang/.m2/repository/'
+        }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:4.2.1"
@@ -22,7 +24,9 @@ allprojects {
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
         maven { url 'https://jitpack.io' }
-
+        maven {
+            url '/Users/liyang/.m2/repository/'
+        }
     }
 }
 

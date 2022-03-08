@@ -35,6 +35,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    dataBinding {
+        enabled = true
+    }
 
 }
 
@@ -50,7 +53,6 @@ dependencies {
     //androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     //androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
-
-    implementation 'com.gitee.leo94666.AnLibrary:AnArch:0.0.2.6'
+    implementation 'com.top.arch:AnArch:1.0'
 
 }
