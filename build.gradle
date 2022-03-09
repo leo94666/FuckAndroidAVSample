@@ -8,6 +8,9 @@ buildscript {
         maven {
             url '/Users/liyang/.m2/repository/'
         }
+        maven {
+            url 'D:\\AMavenRepository'
+        }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:4.2.1"
@@ -26,6 +29,9 @@ allprojects {
         maven { url 'https://jitpack.io' }
         maven {
             url '/Users/liyang/.m2/repository/'
+        }
+        maven {
+            url 'D:\\AMavenRepository'
         }
     }
 }
