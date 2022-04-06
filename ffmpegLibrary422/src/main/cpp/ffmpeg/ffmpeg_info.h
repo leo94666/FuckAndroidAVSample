@@ -6,7 +6,7 @@
 #define AV_FFMPEG_INFO_H
 
 
-#include "../../../../../../../Android/sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/jni.h"
+#include "jni.h"
 
 #ifdef __cplusplus
 extern "C" {

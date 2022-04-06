@@ -3,6 +3,7 @@ project("ffmpegLibrary422")
 
 
 include_directories(include/)
+include_directories(logger/)
 
 # 设置变量
 # CMAKE_CXX_FLAGS 表示会将 C++ 的参数传给编译器
@@ -99,6 +100,11 @@ add_library(cmd   # 库名称
         fftools/ffmpeg_hw.c
         )            # 编译进库的源码
 
+
+add_library(logger   # 库名称
+        SHARED             # 库类型
+        logger/logger.cpp)            # 编译进库的源码
+
 # 查找日志库
 find_library(
         log-lib
@@ -119,3 +125,41 @@ target_link_libraries( # Specifies the target library.
         postproc
         freetype
         ${log-lib})
+
+target_link_libraries(
+        logger
+        ${log-lib}
+)
+
+
+#OpenGles
+# 如果当前系统版本过低设置拒绝编译
+if(${ANDROID_PLATFORM_LEVEL} LESS 11)
+    message(FATAL_ERROR "OPENGL ES2 is not support before API level 11")
+    return()
+elseif(${ANDROID_PLATFORM_LEVEL} LESS 18)
+    add_definitions("-DDYNAMIC_ES3")
+    set(OPENGL_LIB GLESv2)
+else()
+    set(OPENGL_LIB GLESv3)
+endif(${ANDROID_PLATFORM_LEVEL} LESS 11)
+message($OPENGL_LIB)
+
+add_library(
+        SuperNativeRender
+        SHARED
+        gles/SuperNativeRender.cpp
+        gles/SuperGLRenderContext.cpp
+        gles/TriangleSample.cpp
+        gles/GLUtils.cpp
+)
+#
+target_link_libraries(
+        SuperNativeRender
+        -lavu_log
+        -landroid
+        -lEGL
+        -lGLESv3
+        ${log-lib}
+)
+
