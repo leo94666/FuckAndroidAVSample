@@ -5,48 +5,71 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/et_cmd"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/ll_1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dp_10"
-            android:hint="FFmepeg命令"
-            android:textColor="@color/white"
-            android:textColorHint="@color/white"
-            android:textSize="@dimen/sp_16"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/btn_run"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btn_run"
-            android:layout_width="wrap_content"
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_ffmpeg_version"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ffmpeg_version"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_2"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/dp_10"
-            android:background="@color/colorPrimaryDark"
-            android:text="Run"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:onClick="Run"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ll_1"
+            android:layout_marginTop="@dimen/dp_4">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/et_cmd"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dp_10"
+                android:layout_weight="6"
+                android:hint="FFmepeg命令"
+                android:textColor="@color/white"
+                android:textColorHint="@color/color_gray"
+                android:textSize="@dimen/sp_16" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_run"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dp_10"
+                android:layout_weight="1"
+                android:background="@color/colorPrimaryDark"
+                android:onClick="Run"
+                android:text="Run"
+                android:textAllCaps="false"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/ll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp_10"
-            app:layout_constraintTop_toBottomOf="@id/et_cmd">
+            app:layout_constraintTop_toBottomOf="@id/ll_2">
 
             <androidx.appcompat.widget.AppCompatButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dp_10"
                 android:layout_weight="1"
                 android:background="@color/colorPrimaryDark"
-                android:text="urlProtocol"
-                android:layout_margin="@dimen/dp_10"
-                android:textAllCaps="false"
                 android:onClick="urlProtocol"
+                android:text="urlProtocol"
+                android:textAllCaps="false"
                 android:textColor="@color/white" />
 
             <androidx.appcompat.widget.AppCompatButton
@@ -55,8 +78,8 @@
                 android:layout_margin="@dimen/dp_10"
                 android:layout_weight="1"
                 android:background="@color/colorPrimaryDark"
-                android:text="avFormat"
                 android:onClick="avFormat"
+                android:text="avFormat"
                 android:textAllCaps="false"
                 android:textColor="@color/white" />
 
@@ -66,8 +89,8 @@
                 android:layout_margin="@dimen/dp_10"
                 android:layout_weight="1"
                 android:background="@color/colorPrimaryDark"
-                android:text="avCodec"
                 android:onClick="avCodec"
+                android:text="avCodec"
                 android:textAllCaps="false"
                 android:textColor="@color/white" />
 
@@ -77,8 +100,8 @@
                 android:layout_margin="@dimen/dp_10"
                 android:layout_weight="1"
                 android:background="@color/colorPrimaryDark"
-                android:text="avFilter"
                 android:onClick="avFilter"
+                android:text="avFilter"
                 android:textAllCaps="false"
                 android:textColor="@color/white" />
 
@@ -89,9 +112,9 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_margin="@dimen/dp_20"
-            app:layout_constraintTop_toBottomOf="@id/ll"
+            app:layout_constraintBottom_toBottomOf="parent"
 
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/ll">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tv_result"

@@ -12,9 +12,9 @@
 extern "C" {
 #endif
 
-JNIEXPORT jstring JNICALL Java_com_top_ffmpeg_FFmpegCmd_urlProtocolInfo(JNIEnv *env, jclass type);
+JNIEXPORT jstring JNICALL Java_com_top_ffmpeg_FFmpegKits_urlProtocolInfo(JNIEnv *env, jclass type);
 
-JNIEXPORT jstring JNICALL Java_com_top_ffmpeg_FFmpegCmd_avFilterInfo(JNIEnv *env, jclass type);
+JNIEXPORT jstring JNICALL Java_com_top_ffmpeg_FFmpegKits_avFilterInfo(JNIEnv *env, jclass type);
 
 
 

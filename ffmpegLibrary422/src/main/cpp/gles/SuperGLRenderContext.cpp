@@ -3,11 +3,8 @@
 //
 
 #include "SuperGLRenderContext.h"
-#include "ImageDef.h"
-#include <GLES3/gl3.h>
 
-SuperGLRenderContext *SuperGLRenderContext::m_pContext = nullptr;
-
+SuperGLRenderContext* SuperGLRenderContext::m_pContext = nullptr;
 
 void SuperGLRenderContext::SetImageData(int format, int width, int height, uint8_t *data) {
     LOGE("SuperGLRenderContext::SetImageData [format=%d, width=%d, height=%d data=%p]", format,
@@ -18,8 +15,7 @@ void SuperGLRenderContext::SetImageData(int format, int width, int height, uint8
     nativeImage.height = height;
     nativeImage.ppPlane[0] = data;
 
-    switch (format)
-    {
+    switch (format) {
         case IMAGE_FORMAT_NV12:
         case IMAGE_FORMAT_NV21:
             nativeImage.ppPlane[1] = nativeImage.ppPlane[0] + width * height;
@@ -42,7 +38,7 @@ void SuperGLRenderContext::SetImageData(int format, int width, int height, uint8
 void SuperGLRenderContext::OnSurfaceCreated() {
     LOGE("SuperGLRenderContext::OnSurfaceCreated");
     glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
-
+    triangleSample->Init();
 }
 
 void SuperGLRenderContext::OnSurfaceChanged(int width, int height) {
@@ -53,7 +49,7 @@ void SuperGLRenderContext::OnSurfaceChanged(int width, int height) {
 void SuperGLRenderContext::OnDrawFrame() {
     LOGE("SuperGLRenderContext::OnDrawFrame");
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
+    triangleSample->Draw();
 }
 
 SuperGLRenderContext *SuperGLRenderContext::GetInstance() {
@@ -73,7 +69,7 @@ void SuperGLRenderContext::DestroyInstance() {
 }
 
 SuperGLRenderContext::SuperGLRenderContext() {
-
+    triangleSample = new TriangleSample();
 }
 
 SuperGLRenderContext::~SuperGLRenderContext() {

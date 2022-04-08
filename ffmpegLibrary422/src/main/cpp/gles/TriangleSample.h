@@ -7,18 +7,23 @@
 
 
 #include <GLES3/gl3.h>
+#include "../logger/logger.h"
+#include "GLUtils.h"
 
 class TriangleSample {
 
 public:
     TriangleSample();
+
     ~TriangleSample();
+
     void Init();
+
     void Draw();
 
-    GLuint m_ProgramObj{};
 
 protected:
+    GLuint m_ProgramObj;
     GLuint m_VertexShader;
     GLuint m_FragmentShader;
 };

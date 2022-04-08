@@ -56,7 +56,7 @@
 #include "cmdutils.h"
 #if CONFIG_NETWORK
 #include "libavformat/network.h"
-#include "../ffmpeg_cmd/ffmpeg_thread.h"
+#include "../ffmpegkits/ffmpeg_thread.h"
 
 #endif
 #if HAVE_SYS_RESOURCE_H

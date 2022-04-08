@@ -3,7 +3,6 @@
 //
 
 #include "GLUtils.h"
-#include "../log/android_log.h"
 
 GLuint GLUtils::LoadShader(GLenum shaderType, const char *pSource) {
     GLuint shader = 0;

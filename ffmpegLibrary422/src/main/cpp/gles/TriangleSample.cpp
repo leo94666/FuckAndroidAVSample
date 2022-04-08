@@ -3,12 +3,11 @@
 //
 
 #include "TriangleSample.h"
-#include "../log/android_log.h"
-#include "GLUtils.h"
-#include <GLES3/gl3.h>
 
 
-TriangleSample::TriangleSample() = default;
+TriangleSample::TriangleSample() {
+
+}
 
 TriangleSample::~TriangleSample() {
     if (m_ProgramObj) {
@@ -41,7 +40,7 @@ void TriangleSample::Init() {
 void TriangleSample::Draw() {
     LOGE("SuperGLRenderContext::Draw");
     GLfloat vVertices[] = {
-            0.0f, 0.5f, 0.0f,
+            0.5f, 0.5f, 0.0f,
             -0.5f, -0.5f, 0.0f,
             0.5f, -0.5f, 0.0f,
     };
@@ -58,3 +57,4 @@ void TriangleSample::Draw() {
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
 }
+

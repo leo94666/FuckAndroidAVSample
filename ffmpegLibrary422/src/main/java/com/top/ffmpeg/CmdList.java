@@ -3,6 +3,9 @@ package com.top.ffmpeg;
 
 import java.util.ArrayList;
 
+import kotlin.Deprecated;
+
+@Deprecated(message = "废弃")
 public class CmdList extends ArrayList<String> {
 
 

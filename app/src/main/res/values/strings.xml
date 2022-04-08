@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Android FFmpeg</string>
+    <string name="ffmpeg_version">FFmpeg version: %1$s</string>
 </resources>

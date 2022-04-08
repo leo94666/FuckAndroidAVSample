@@ -1,13 +1,6 @@
-/**
- *
- * Created by 公众号：字节流动 on 2021/3/12.
- * https://github.com/githubhaohao/NDK_OpenGLES_3_0
- * 最新文章首发于公众号：字节流动，有疑问或者技术交流可以添加微信 Byte-Flow ,领取视频教程, 拉你进技术交流群
- *
- * */
+#ifndef AV_IMAGEDEF_H
+#define AV_IMAGEDEF_H
 
-#ifndef NDK_OPENGLES_3_0_IMAGEDEF_H
-#define NDK_OPENGLES_3_0_IMAGEDEF_H
 
 #include <malloc.h>
 #include <string.h>
@@ -15,7 +8,7 @@
 #include "stdio.h"
 #include "sys/stat.h"
 #include "stdint.h"
-#include "LogUtil.h"
+#include "../logger/logger.h"
 
 #define IMAGE_FORMAT_RGBA           0x01
 #define IMAGE_FORMAT_NV21           0x02
@@ -123,7 +116,7 @@ public:
 			}
 				break;
 			default:
-				LOGCATE("NativeImageUtil::AllocNativeImage do not support the format. Format = %d", pImage->format);
+				LOGE("NativeImageUtil::AllocNativeImage do not support the format. Format = %d", pImage->format);
 				break;
 		}
 	}
@@ -180,7 +173,7 @@ public:
 				break;
 			default:
 			{
-				LOGCATE("NativeImageUtil::CopyNativeImage do not support the format. Format = %d", pSrcImg->format);
+				LOGE("NativeImageUtil::CopyNativeImage do not support the format. Format = %d", pSrcImg->format);
 			}
 				break;
 		}
@@ -233,7 +226,7 @@ public:
 
 		FILE *fp = fopen(imgPath, "wb");
 
-		LOGCATE("DumpNativeImage fp=%p, file=%s", fp, imgPath);
+		LOGE("DumpNativeImage fp=%p, file=%s", fp, imgPath);
 
 		if(fp)
 		{
@@ -296,7 +289,7 @@ public:
 				{
 					fwrite(pSrcImg->ppPlane[0],
 						   static_cast<size_t>(pSrcImg->width * pSrcImg->height), 1, fp);
-					LOGCATE("DumpNativeImage default");
+					LOGE("DumpNativeImage default");
 					break;
 				}
 			}
@@ -311,7 +304,7 @@ public:
 		if (pSrcImg == nullptr || pPath == nullptr) return;
 
 		FILE *fp = fopen(pPath, "rb");
-		LOGCATE("LoadNativeImage fp=%p, file=%s", fp, pPath);
+		LOGE("LoadNativeImage fp=%p, file=%s", fp, pPath);
 		int dataSize = 0;
 		if(fp)
 		{
@@ -352,7 +345,7 @@ public:
 				}
 				default:
 				{
-					LOGCATE("LoadNativeImage not support the format %d.", pSrcImg->format);
+					LOGE("LoadNativeImage not support the format %d.", pSrcImg->format);
 					break;
 				}
 			}
@@ -434,4 +427,4 @@ public:
 };
 
 
-#endif //NDK_OPENGLES_3_0_IMAGEDEF_H
+#endif //AV_IMAGEDEF_H

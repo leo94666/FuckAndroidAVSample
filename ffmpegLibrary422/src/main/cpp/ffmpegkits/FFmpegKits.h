@@ -12,7 +12,7 @@ extern "C" {
  * Method:    version
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_com_top_ffmpeg_FFmpegCmd_version
+JNIEXPORT jstring JNICALL Java_com_top_ffmpeg_FFmpegKits_version
   (JNIEnv *, jclass);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT jstring JNICALL Java_com_top_ffmpeg_FFmpegCmd_version
  * Method:    exec
  * Signature: (I[Ljava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_com_top_ffmpeg_FFmpegCmd_exec (JNIEnv *, jclass, jint, jobjectArray);
+JNIEXPORT jint JNICALL Java_com_top_ffmpeg_FFmpegKits_exec (JNIEnv *, jclass, jint, jobjectArray);
 
 #ifdef __cplusplus
 }

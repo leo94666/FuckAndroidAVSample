@@ -1,6 +1,8 @@
 package com.top.ffmpeg;
 
 
+import kotlin.Deprecated;
+
 /**
  * @author leo
  * @version 1.0
@@ -8,10 +10,11 @@ package com.top.ffmpeg;
  * @description FFmpeg Java 入口
  * @date 2022/2/15 17:34
  **/
-public class FFmpegCmd {
+@Deprecated(message = "废弃")
+public class FFmpegKits {
 
     static {
-        System.loadLibrary("cmd");
+        System.loadLibrary("FFmpegKits");
     }
 
     private static OnCmdExecListener sOnCmdExecListener;

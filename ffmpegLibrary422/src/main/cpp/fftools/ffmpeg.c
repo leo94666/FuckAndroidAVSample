@@ -118,7 +118,7 @@
 #include "cmdutils.h"
 
 #include "libavutil/avassert.h"
-#include "../ffmpeg_cmd/com_top_ffmpeg_cmd.h"
+#include "../ffmpegkits//FFmpegKits.h"
 #include "../log/android_log.h"
 
 const char program_name[] = "ffmpeg";

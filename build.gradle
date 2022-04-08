@@ -5,9 +5,9 @@ buildscript {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-        maven {
-            url '/Users/liyang/.m2/repository/'
-        }
+//        maven {
+//            url '/Users/liyang/.m2/repository/'
+//        }
         maven {
             url 'D:\\AMavenRepository'
         }
@@ -27,9 +27,9 @@ allprojects {
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
         maven { url 'https://jitpack.io' }
-        maven {
-            url '/Users/liyang/.m2/repository/'
-        }
+//        maven {
+//            url '/Users/liyang/.m2/repository/'
+//        }
         maven {
             url 'D:\\AMavenRepository'
         }

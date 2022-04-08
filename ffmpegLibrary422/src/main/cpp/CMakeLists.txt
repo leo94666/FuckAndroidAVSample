@@ -15,84 +15,84 @@ include_directories(logger/)
 
 add_library(freetype
         SHARED
-        IMPORTED )
+        IMPORTED)
 set_target_properties(freetype
         PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libfreetype.so )
+        ../../../../libs/${ANDROID_ABI}/libfreetype.so)
 
 add_library(avdevice
         SHARED
-        IMPORTED )
-set_target_properties( avdevice
+        IMPORTED)
+set_target_properties(avdevice
         PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libavdevice.so )
+        ../../../../libs/${ANDROID_ABI}/libavdevice.so)
 
 add_library(avcodec
         SHARED
-        IMPORTED )
+        IMPORTED)
 set_target_properties(avcodec
         PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libavcodec.so )
+        ../../../../libs/${ANDROID_ABI}/libavcodec.so)
 
 add_library(avfilter
         SHARED
-        IMPORTED )
+        IMPORTED)
 set_target_properties(avfilter
         PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libavfilter.so )
+        ../../../../libs/${ANDROID_ABI}/libavfilter.so)
 
 add_library(avformat
         SHARED
-        IMPORTED )
-set_target_properties( avformat
+        IMPORTED)
+set_target_properties(avformat
         PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libavformat.so )
+        ../../../../libs/${ANDROID_ABI}/libavformat.so)
 
 add_library(avutil
         SHARED
-        IMPORTED )
-set_target_properties( avutil
+        IMPORTED)
+set_target_properties(avutil
         PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libavutil.so )
+        ../../../../libs/${ANDROID_ABI}/libavutil.so)
 
 add_library(swresample
         SHARED
-        IMPORTED )
+        IMPORTED)
 set_target_properties(swresample
         PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libswresample.so )
+        ../../../../libs/${ANDROID_ABI}/libswresample.so)
 
 
 add_library(avresample
         SHARED
-        IMPORTED )
+        IMPORTED)
 set_target_properties(avresample
         PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libavresample.so )
+        ../../../../libs/${ANDROID_ABI}/libavresample.so)
 
 add_library(swscale
         SHARED
-        IMPORTED )
+        IMPORTED)
 set_target_properties(swscale
         PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libswscale.so )
+        ../../../../libs/${ANDROID_ABI}/libswscale.so)
 add_library(postproc
         SHARED
-        IMPORTED )
+        IMPORTED)
 set_target_properties(postproc
         PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libpostproc.so )
+        ../../../../libs/${ANDROID_ABI}/libpostproc.so)
 
 message(WARNING "CMAKE_SOURCE_DIR : ${CMAKE_SOURCE_DIR}, ANDROID_ABI : ${ANDROID_ABI}")
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
 # 编译一个ffmpeg-cmd库
-add_library(cmd   # 库名称
+add_library(FFmpegKits   # 库名称
         SHARED             # 库类型
-        ffmpeg_cmd/FFmpegCmd.c
+        ffmpegkits/FFmpegKits.c
         ffmpeg/ffmpeg_info.c
-        ffmpeg_cmd/ffmpeg_thread.c
+        ffmpegkits/ffmpeg_thread.c
         fftools/cmdutils.c
         fftools/ffmpeg.c
         fftools/ffmpeg_filter.c
@@ -101,9 +101,9 @@ add_library(cmd   # 库名称
         )            # 编译进库的源码
 
 
-add_library(logger   # 库名称
-        SHARED             # 库类型
-        logger/logger.cpp)            # 编译进库的源码
+#add_library(logger   # 库名称
+#        SHARED             # 库类型
+#        logger/logger.cpp)            # 编译进库的源码
 
 # 查找日志库
 find_library(
@@ -112,7 +112,7 @@ find_library(
 
 
 target_link_libraries( # Specifies the target library.
-        cmd
+        FFmpegKits
         #下面这些是链接的库名称（其实就是so文件去掉前面的lib和后面的.so）
         avcodec
         avdevice
@@ -126,40 +126,49 @@ target_link_libraries( # Specifies the target library.
         freetype
         ${log-lib})
 
-target_link_libraries(
-        logger
-        ${log-lib}
-)
+#target_link_libraries(
+#        logger
+#        ${log-lib}
+#)
 
 
 #OpenGles
 # 如果当前系统版本过低设置拒绝编译
-if(${ANDROID_PLATFORM_LEVEL} LESS 11)
+if (${ANDROID_PLATFORM_LEVEL} LESS 11)
     message(FATAL_ERROR "OPENGL ES2 is not support before API level 11")
     return()
-elseif(${ANDROID_PLATFORM_LEVEL} LESS 18)
+elseif (${ANDROID_PLATFORM_LEVEL} LESS 18)
     add_definitions("-DDYNAMIC_ES3")
     set(OPENGL_LIB GLESv2)
-else()
+else ()
     set(OPENGL_LIB GLESv3)
-endif(${ANDROID_PLATFORM_LEVEL} LESS 11)
+endif (${ANDROID_PLATFORM_LEVEL} LESS 11)
 message($OPENGL_LIB)
 
 add_library(
         SuperNativeRender
         SHARED
-        gles/SuperNativeRender.cpp
         gles/SuperGLRenderContext.cpp
         gles/TriangleSample.cpp
         gles/GLUtils.cpp
+        NativeMethodRegister.cpp
 )
 #
 target_link_libraries(
         SuperNativeRender
-        -lavu_log
         -landroid
         -lEGL
         -lGLESv3
+        avcodec
+        avdevice
+        avfilter
+        avformat
+        avutil
+        avresample
+        swresample
+        swscale
+        postproc
+        freetype
         ${log-lib}
 )
 

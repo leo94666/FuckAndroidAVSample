@@ -23,6 +23,11 @@
         </activity>
         <activity android:name=".ui.FFmpegInfoActivity"
             android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.OpenGLESActivity"
+            android:label="OpenGl"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>

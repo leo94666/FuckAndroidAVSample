@@ -4,7 +4,7 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.top.ffmpeg.CmdList;
-import com.top.ffmpeg.FFmpegCmd;
+import com.top.ffmpeg.FFmpegKits;
 import com.top.ffmpeg.entity.Video;
 
 import java.io.File;
@@ -250,7 +250,7 @@ public class VideoEditor {
             cmdLog = cmdLog + " " + ss;
         }
         Log.i(TAG, "cmd:" + cmdLog);
-        FFmpegCmd.exec(cmds, duration, new FFmpegCmd.OnCmdExecListener() {
+        FFmpegKits.exec(cmds, duration, new FFmpegKits.OnCmdExecListener() {
             @Override
             public void onSuccess() {
                 listener.onSuccess();

@@ -14,12 +14,18 @@ import android.util.AttributeSet;
 public class SuperGLSurfaceView extends GLSurfaceView {
 
     private SuperGLRender mGLRender;
+    private SuperNativeRender mSuperNativeRender;
     public SuperGLSurfaceView(Context context) {
         super(context);
     }
 
     public SuperGLSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.setEGLContextClientVersion(3);
+        mSuperNativeRender=new SuperNativeRender();
+        mGLRender = new SuperGLRender(mSuperNativeRender);
+        setRenderer(mGLRender);
+        setRenderMode(RENDERMODE_CONTINUOUSLY);
     }
 
 

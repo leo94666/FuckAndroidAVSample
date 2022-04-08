@@ -4,8 +4,9 @@
 #include <libavcodec/avcodec.h>
 #include "ffmpeg_thread.h"
 #include "../log/android_log.h"
-#include "com_top_ffmpeg_cmd.h"
+#include "FFmpegKits.h"
 #include "../ffmpeg/ffmpeg_info.h"
+
 static JavaVM *jvm = NULL;
 
 static jclass m_clazz = NULL;//当前类(面向java)
@@ -68,14 +69,14 @@ void ffmpeg_progress(float progress) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_top_ffmpeg_FFmpegCmd_version(JNIEnv *env, jclass clazz) {
+Java_com_top_ffmpeg_FFmpegKits_version(JNIEnv *env, jclass clazz) {
     char str[25];
     sprintf(str, "%d", avcodec_version());
     return (*env)->NewStringUTF(env, str);
 }
 
 JNIEXPORT jint JNICALL
-Java_com_top_ffmpeg_FFmpegCmd_exec(JNIEnv *env, jclass clazz, jint cmdnum, jobjectArray cmdline) {
+Java_com_top_ffmpeg_FFmpegKits_exec(JNIEnv *env, jclass clazz, jint cmdnum, jobjectArray cmdline) {
     (*env)->GetJavaVM(env, &jvm);
     //创建全局引用
     m_clazz = (*env)->NewGlobalRef(env, clazz);

@@ -9,7 +9,7 @@
 
 
 JNIEXPORT jstring JNICALL
-Java_com_top_ffmpeg_FFmpegCmd_urlProtocolInfo(JNIEnv *env, jclass type) {
+Java_com_top_ffmpeg_FFmpegKits_urlProtocolInfo(JNIEnv *env, jclass type) {
     char info[40000] = {0};
     av_register_all();
 
@@ -32,7 +32,7 @@ Java_com_top_ffmpeg_FFmpegCmd_urlProtocolInfo(JNIEnv *env, jclass type) {
 
 
 JNIEXPORT jstring JNICALL
-Java_com_top_ffmpeg_FFmpegCmd_avFilterInfo(JNIEnv *env, jclass type) {
+Java_com_top_ffmpeg_FFmpegKits_avFilterInfo(JNIEnv *env, jclass type) {
     char info[40000] = {0};
     avfilter_register_all();
 
@@ -48,7 +48,7 @@ Java_com_top_ffmpeg_FFmpegCmd_avFilterInfo(JNIEnv *env, jclass type) {
 
 
 JNIEXPORT jstring JNICALL
-Java_com_top_ffmpeg_FFmpegCmd_avFormatInfo(JNIEnv *env, jclass type) {
+Java_com_top_ffmpeg_FFmpegKits_avFormatInfo(JNIEnv *env, jclass type) {
     char info[40000] = {0};
 
     av_register_all();
@@ -68,7 +68,7 @@ Java_com_top_ffmpeg_FFmpegCmd_avFormatInfo(JNIEnv *env, jclass type) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_top_ffmpeg_FFmpegCmd_avCodecInfo(JNIEnv *env, jclass type) {
+Java_com_top_ffmpeg_FFmpegKits_avCodecInfo(JNIEnv *env, jclass type) {
     char info[40000] = {0};
 
     av_register_all();
