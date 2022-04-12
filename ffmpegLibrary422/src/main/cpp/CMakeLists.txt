@@ -73,6 +73,7 @@ set_target_properties(avresample
 add_library(swscale
         SHARED
         IMPORTED)
+
 set_target_properties(swscale
         PROPERTIES IMPORTED_LOCATION
         ../../../../libs/${ANDROID_ABI}/libswscale.so)
