@@ -31,6 +31,7 @@ add_library(FFmpegKits   # 库名称
         ffmpeg/ffmpeg_info.c
         ffmpegkits/ffmpeg_thread.c
         fftools/cmdutils.c
+        #fftools/ffprobe.c
         fftools/ffmpeg.c
         fftools/ffmpeg_filter.c
         fftools/ffmpeg_opt.c

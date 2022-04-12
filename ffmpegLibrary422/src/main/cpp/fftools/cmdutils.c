@@ -57,6 +57,8 @@
 #include "cmdutils.h"
 #if CONFIG_NETWORK
 #include "libavformat/network.h"
+#include "../ffmpegkits/ffmpeg_thread.h"
+
 #endif
 #if HAVE_SYS_RESOURCE_H
 #include <sys/time.h>
@@ -137,8 +139,9 @@ void exit_program(int ret)
 {
     if (program_exit)
         program_exit(ret);
-
-    exit(ret);
+    // 退出线程(该函数后面定义) edit by leo
+    ffmpeg_thread_exit(ret);
+    //exit(ret);
 }
 
 double parse_number_or_die(const char *context, const char *numstr, int type,

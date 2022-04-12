@@ -27,6 +27,7 @@
 #include "libavutil/ffversion.h"
 
 #include <string.h>
+#include <pthread.h>
 
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
@@ -52,7 +53,7 @@
 #include "libpostproc/postprocess.h"
 #include "cmdutils.h"
 
-#include "libavutil/thread.h"
+
 
 #if !HAVE_THREADS
 #  ifdef pthread_mutex_lock
@@ -3562,7 +3563,7 @@ static inline int check_section_show_entries(int section_id)
             do_show_##varname = 1;                                      \
     } while (0)
 
-int main(int argc, char **argv)
+int ffprobe(int argc, char **argv)
 {
     const Writer *w;
     WriterContext *wctx;

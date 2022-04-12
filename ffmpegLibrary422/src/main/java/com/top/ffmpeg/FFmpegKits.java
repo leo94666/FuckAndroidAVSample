@@ -14,6 +14,7 @@ import kotlin.Deprecated;
 public class FFmpegKits {
 
     static {
+        System.loadLibrary("ffmpeg");
         System.loadLibrary("FFmpegKits");
     }
 
