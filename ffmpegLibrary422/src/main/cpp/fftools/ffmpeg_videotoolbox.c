@@ -16,19 +16,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "../../../../libs/include/config.h"
+#include "config.h"
 
 #if HAVE_UTGETOSTYPEFROMSTRING
 #include <CoreServices/CoreServices.h>
 #endif
 
 #include "libavcodec/avcodec.h"
-#if CONFIG_VDA
-#  include "libavcodec/vda.h"
-#endif
-#if CONFIG_VIDEOTOOLBOX
-#  include "libavcodec/videotoolbox.h"
-#endif
+#include "libavcodec/videotoolbox.h"
 #include "libavutil/imgutils.h"
 #include "ffmpeg.h"
 
@@ -57,6 +52,9 @@ static int videotoolbox_retrieve_data(AVCodecContext *s, AVFrame *frame)
     case kCVPixelFormatType_32BGRA:           vt->tmp_frame->format = AV_PIX_FMT_BGRA; break;
 #ifdef kCFCoreFoundationVersionNumber10_7
     case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange: vt->tmp_frame->format = AV_PIX_FMT_NV12; break;
+#endif
+#if HAVE_KCVPIXELFORMATTYPE_420YPCBCR10BIPLANARVIDEORANGE
+    case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange: vt->tmp_frame->format = AV_PIX_FMT_P010; break;
 #endif
     default:
         av_log(NULL, AV_LOG_ERROR,
@@ -114,15 +112,7 @@ static void videotoolbox_uninit(AVCodecContext *s)
 
     av_frame_free(&vt->tmp_frame);
 
-    if (ist->hwaccel_id == HWACCEL_VIDEOTOOLBOX) {
-#if CONFIG_VIDEOTOOLBOX
-        av_videotoolbox_default_free(s);
-#endif
-    } else {
-#if CONFIG_VDA
-        av_vda_default_free(s);
-#endif
-    }
+    av_videotoolbox_default_free(s);
     av_freep(&ist->hwaccel_ctx);
 }
 
@@ -147,8 +137,7 @@ int videotoolbox_init(AVCodecContext *s)
         goto fail;
     }
 
-    if (ist->hwaccel_id == HWACCEL_VIDEOTOOLBOX) {
-#if CONFIG_VIDEOTOOLBOX
+    // TODO: reindent
         if (!videotoolbox_pixfmt) {
             ret = av_videotoolbox_default_init(s);
         } else {
@@ -166,31 +155,8 @@ int videotoolbox_init(AVCodecContext *s)
             ret = av_videotoolbox_default_init2(s, vtctx);
             CFRelease(pixfmt_str);
         }
-#endif
-    } else {
-#if CONFIG_VDA
-        if (!videotoolbox_pixfmt) {
-            ret = av_vda_default_init(s);
-        } else {
-            AVVDAContext *vdactx = av_vda_alloc_context();
-            CFStringRef pixfmt_str = CFStringCreateWithCString(kCFAllocatorDefault,
-                                                               videotoolbox_pixfmt,
-                                                               kCFStringEncodingUTF8);
-#if HAVE_UTGETOSTYPEFROMSTRING
-            vdactx->cv_pix_fmt_type = UTGetOSTypeFromString(pixfmt_str);
-#else
-            av_log(s, loglevel, "UTGetOSTypeFromString() is not available "
-                   "on this platform, %s pixel format can not be honored from "
-                   "the command line\n", videotoolbox_pixfmt);
-#endif
-            ret = av_vda_default_init2(s, vdactx);
-            CFRelease(pixfmt_str);
-        }
-#endif
-    }
     if (ret < 0) {
-        av_log(NULL, loglevel,
-               "Error creating %s decoder.\n", ist->hwaccel_id == HWACCEL_VIDEOTOOLBOX ? "Videotoolbox" : "VDA");
+        av_log(NULL, loglevel, "Error creating Videotoolbox decoder.\n");
         goto fail;
     }
 

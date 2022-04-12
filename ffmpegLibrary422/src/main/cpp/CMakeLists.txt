@@ -13,76 +13,12 @@ include_directories(logger/)
 #   -L 参数指定动态库的查找路径
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}")
 
-add_library(freetype
+add_library(ffmpeg
         SHARED
         IMPORTED)
-set_target_properties(freetype
+set_target_properties(ffmpeg
         PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libfreetype.so)
-
-add_library(avdevice
-        SHARED
-        IMPORTED)
-set_target_properties(avdevice
-        PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libavdevice.so)
-
-add_library(avcodec
-        SHARED
-        IMPORTED)
-set_target_properties(avcodec
-        PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libavcodec.so)
-
-add_library(avfilter
-        SHARED
-        IMPORTED)
-set_target_properties(avfilter
-        PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libavfilter.so)
-
-add_library(avformat
-        SHARED
-        IMPORTED)
-set_target_properties(avformat
-        PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libavformat.so)
-
-add_library(avutil
-        SHARED
-        IMPORTED)
-set_target_properties(avutil
-        PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libavutil.so)
-
-add_library(swresample
-        SHARED
-        IMPORTED)
-set_target_properties(swresample
-        PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libswresample.so)
-
-
-add_library(avresample
-        SHARED
-        IMPORTED)
-set_target_properties(avresample
-        PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libavresample.so)
-
-add_library(swscale
-        SHARED
-        IMPORTED)
-
-set_target_properties(swscale
-        PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libswscale.so)
-add_library(postproc
-        SHARED
-        IMPORTED)
-set_target_properties(postproc
-        PROPERTIES IMPORTED_LOCATION
-        ../../../../libs/${ANDROID_ABI}/libpostproc.so)
+        ../../../../libs/${ANDROID_ABI}/libffmpeg.so)
 
 message(WARNING "CMAKE_SOURCE_DIR : ${CMAKE_SOURCE_DIR}, ANDROID_ABI : ${ANDROID_ABI}")
 
@@ -102,10 +38,6 @@ add_library(FFmpegKits   # 库名称
         )            # 编译进库的源码
 
 
-#add_library(logger   # 库名称
-#        SHARED             # 库类型
-#        logger/logger.cpp)            # 编译进库的源码
-
 # 查找日志库
 find_library(
         log-lib
@@ -115,28 +47,8 @@ find_library(
 target_link_libraries( # Specifies the target library.
         FFmpegKits
         #下面这些是链接的库名称（其实就是so文件去掉前面的lib和后面的.so）
-        avcodec
-        avdevice
-        avfilter
-        avformat
-        avutil
-        avresample
-        swresample
-        swscale
-        postproc
-        freetype
+        ffmpeg
         ${log-lib})
-
-
-#add_library(cpufeatures STATIC ${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c)
-#target_include_directories(hello-neon PRIVATE ${ANDROID_NDK}/sources/android/cpufeatures)
-#target_link_libraries(hello-neon cpufeatures)
-
-#target_link_libraries(
-#        logger
-#        ${log-lib}
-#)
-
 
 #OpenGles
 # 如果当前系统版本过低设置拒绝编译
@@ -165,16 +77,7 @@ target_link_libraries(
         -landroid
         -lEGL
         -lGLESv3
-        avcodec
-        avdevice
-        avfilter
-        avformat
-        avutil
-        avresample
-        swresample
-        swscale
-        postproc
-        freetype
+        ffmpeg
         ${log-lib}
 )
 
