@@ -240,7 +240,7 @@ void show_help_options(const OptionDef *options, const char *msg, int req_flags,
     { "muxers",      OPT_EXIT,             { .func_arg = show_muxers },      "show available muxers" },                 \
     { "demuxers",    OPT_EXIT,             { .func_arg = show_demuxers },    "show available demuxers" },               \
     { "devices",     OPT_EXIT,             { .func_arg = show_devices },     "show available devices" },                \
-    { "codecs",      OPT_EXIT,             { .func_arg = show_codecs },      "show available codecs" },                 \
+    { "codecs",      OPT_EXIT,             { .func_arg = show_codecs },      "sh ow available codecs" },                 \
     { "decoders",    OPT_EXIT,             { .func_arg = show_decoders },    "show available decoders" },               \
     { "encoders",    OPT_EXIT,             { .func_arg = show_encoders },    "show available encoders" },               \
     { "bsfs",        OPT_EXIT,             { .func_arg = show_bsfs },        "show available bit stream filters" },     \

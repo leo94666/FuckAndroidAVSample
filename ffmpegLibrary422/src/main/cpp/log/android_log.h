@@ -5,7 +5,7 @@
 #include "libavutil/log.h"
 #include "compat/va_copy.h"
 
-static int use_log_report = 0;
+static int use_log_report = 1;
 
 
 #define FF_LOG_TAG     "FFmpeg_C_Leo_Log"

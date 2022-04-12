@@ -126,6 +126,11 @@ target_link_libraries( # Specifies the target library.
         freetype
         ${log-lib})
 
+
+#add_library(cpufeatures STATIC ${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c)
+#target_include_directories(hello-neon PRIVATE ${ANDROID_NDK}/sources/android/cpufeatures)
+#target_link_libraries(hello-neon cpufeatures)
+
 #target_link_libraries(
 #        logger
 #        ${log-lib}
