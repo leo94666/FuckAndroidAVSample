@@ -8,7 +8,6 @@
 #include "stdio.h"
 #include "sys/stat.h"
 #include "stdint.h"
-#include "../logger/logger.h"
 
 #define IMAGE_FORMAT_RGBA           0x01
 #define IMAGE_FORMAT_NV21           0x02

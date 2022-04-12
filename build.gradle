@@ -8,9 +8,9 @@ buildscript {
 //        maven {
 //            url '/Users/liyang/.m2/repository/'
 //        }
-//        maven {
-//            url 'D:\\AMavenRepository'
-//        }
+        maven {
+            url 'D:\\AMavenRepository'
+        }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:4.2.1"
@@ -30,9 +30,9 @@ allprojects {
 //        maven {
 //            url '/Users/liyang/.m2/repository/'
 //        }
-//        maven {
-//            url 'D:\\AMavenRepository'
-//        }
+        maven {
+            url 'D:\\AMavenRepository'
+        }
     }
 }
 
