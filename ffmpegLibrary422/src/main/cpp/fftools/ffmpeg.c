@@ -122,6 +122,8 @@ const int program_birth_year = 2000;
 
 static FILE *vstats_file;
 
+void (*report_callback)(int, float, float, int64_t, int, double, double) = NULL;
+
 const char *const forced_keyframes_const_names[] = {
         "n",
         "n_forced",
@@ -1655,6 +1657,74 @@ static void print_final_stats(int64_t total_size) {
         } else {
             av_log(NULL, AV_LOG_WARNING, "(check -ss / -t / -frames parameters if used)\n");
         }
+    }
+}
+
+static void forward_report(int is_last_report, int64_t timer_start, int64_t cur_time) {
+    AVFormatContext *oc = NULL;
+    AVCodecContext *enc = NULL;
+    OutputStream *ost = NULL;
+    int64_t pts = INT64_MIN + 1;
+    int vid, i;
+
+    int frame_number = 0;
+    float fps = 0;
+    float quality = 0;
+    int64_t total_size = 0;
+    int seconds = 0;
+    double bitrate = 0.0;
+    double speed = 0.0;
+
+    float t = (cur_time - timer_start) / 1000000.0;
+
+    oc = output_files[0]->ctx;
+
+    // 1. calculate size
+    total_size = avio_size(oc->pb);
+    if (total_size <= 0) {
+        total_size = avio_tell(oc->pb);
+    }
+
+    vid = 0;
+    for (i = 0; i < nb_output_streams; i++) {
+        ost = output_streams[i];
+        enc = ost->enc_ctx;
+
+        if (!ost->stream_copy) {
+
+            // 2. extract quality
+            quality = ost->quality / (float) FF_QP2LAMBDA;
+        }
+
+        if (!vid && enc->codec_type == AVMEDIA_TYPE_VIDEO) {
+
+            // 3. extract frame number
+            frame_number = ost->frame_number;
+
+            // 4. calculate fps
+            fps = t > 1 ? frame_number / t : 0;
+        }
+
+        // 5. calculate time
+        if (av_stream_get_end_pts(ost->st) != AV_NOPTS_VALUE)
+            pts = FFMAX(pts, av_rescale_q(av_stream_get_end_pts(ost->st),
+                                          ost->st->time_base, AV_TIME_BASE_Q));
+
+        vid = 1;
+    }
+
+    // 6. calculate time, with microseconds to milliseconds conversion
+    seconds = FFABS(pts) / 1000;
+
+    // 7. calculating kbit/s value
+    bitrate = pts && total_size >= 0 ? total_size * 8 / (pts / 1000.0) : -1;
+
+    // 9. calculate processing speed = processed stream duration/operation duration
+    speed = t != 0.0 ? (double) pts / AV_TIME_BASE / t : -1;
+
+    // FORWARD DATA
+    if (report_callback != NULL) {
+        report_callback(frame_number, fps, quality, total_size, seconds, bitrate, speed);
     }
 }
 
@@ -4871,12 +4941,14 @@ static int64_t getmaxrss(void) {
 static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl) {
 }
 
-int ffmpeg(int argc, char **argv) {
+
+int ffmpeg_execute(int argc, char **argv) {
+    //1.局部变量声明
     int i, ret;
     BenchmarkTimeStamps ti;
-
+    //2.初始化动态加载
     init_dynload();
-
+    //3.初始化程序结束所调用的函数指针
     register_exit(ffmpeg_cleanup);
 
     if (use_log_report) {
@@ -4884,26 +4956,32 @@ int ffmpeg(int argc, char **argv) {
     } else {
         av_log_set_callback(ffp_log_callback_brief);
     }
+
+    //4.为标准错误描述符设置缓冲模式：无缓冲：不使用缓冲。每个 I/O 操作都被即时写入。buffer 和 size 参数被忽略。
     setvbuf(stderr, NULL, _IONBF, 0); /* win32 runtime needs this */
 
+    //5.初始化日志等级
     av_log_set_flags(AV_LOG_SKIP_REPEATED);
     parse_loglevel(argc, argv, options);
 
+    //6.守护进程运行标志处理
     if (argc > 1 && !strcmp(argv[1], "-d")) {
         run_as_daemon = 1;
         av_log_set_callback(log_callback_null);
         argc--;
         argv++;
     }
-
+//7.初始化
 #if CONFIG_AVDEVICE
     avdevice_register_all();
 #endif
     avformat_network_init();
 
+    //8.打印相关基础信息
     show_banner(argc, argv, options);
 
     /* parse options and open all input/output files */
+    //9.解析选项并打开输入输出文件
     ret = ffmpeg_parse_options(argc, argv);
     if (ret < 0)
         exit_program(1);
@@ -4939,8 +5017,7 @@ int ffmpeg(int argc, char **argv) {
                "bench: utime=%0.3fs stime=%0.3fs rtime=%0.3fs\n",
                utime / 1000000.0, stime / 1000000.0, rtime / 1000000.0);
     }
-    av_log(NULL, AV_LOG_DEBUG, "%"PRIu64" frames successfully decoded, %"PRIu64" decoding errors\n",
-           decode_error_stat[0], decode_error_stat[1]);
+    av_log(NULL, AV_LOG_DEBUG, "%"PRIu64" frames successfully decoded, %"PRIu64" decoding errors\n", decode_error_stat[0], decode_error_stat[1]);
     if ((decode_error_stat[0] + decode_error_stat[1]) * max_error_rate < decode_error_stat[1])
         exit_program(69);
 

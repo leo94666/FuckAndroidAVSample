@@ -8,7 +8,6 @@
 
 
 #include <jni.h>
-#include "logger.h"
 #include "gles/SuperGLRenderContext.h"
 
 

@@ -2,27 +2,21 @@ cmake_minimum_required(VERSION 3.4.1)
 project("ffmpegLibrary422")
 
 
-include_directories(include/)
-include_directories(logger/)
+include_directories(abii)
+include_directories(logger)
+include_directories(include)
 
-# 设置变量
-# CMAKE_CXX_FLAGS 表示会将 C++ 的参数传给编译器
-# CMAKE_C_FLAGS 表示会将 C 参数传给编译器
-# 参数设置 : 传递 CMAKE_CXX_FLAGS C+= 参数给编译器时 , 在 该参数后面指定库的路径
-#   CMAKE_SOURCE_DIR 指的是当前的文件地址
-#   -L 参数指定动态库的查找路径
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}")
+include(AndroidNdkModules)
+android_ndk_import_module_cpufeatures()
+
 
 add_library(ffmpeg
         SHARED
         IMPORTED)
+
 set_target_properties(ffmpeg
         PROPERTIES IMPORTED_LOCATION
         ../../../../libs/${ANDROID_ABI}/libffmpeg.so)
-
-message(WARNING "CMAKE_SOURCE_DIR : ${CMAKE_SOURCE_DIR}, ANDROID_ABI : ${ANDROID_ABI}")
-
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
 # 编译一个ffmpeg-cmd库
 add_library(FFmpegKits   # 库名称
@@ -35,8 +29,7 @@ add_library(FFmpegKits   # 库名称
         fftools/ffmpeg.c
         fftools/ffmpeg_filter.c
         fftools/ffmpeg_opt.c
-        fftools/ffmpeg_hw.c
-        )            # 编译进库的源码
+        fftools/ffmpeg_hw.c)            # 编译进库的源码
 
 
 # 查找日志库
@@ -48,8 +41,10 @@ find_library(
 target_link_libraries( # Specifies the target library.
         FFmpegKits
         #下面这些是链接的库名称（其实就是so文件去掉前面的lib和后面的.so）
+        cpufeatures
         ffmpeg
         ${log-lib})
+
 
 #OpenGles
 # 如果当前系统版本过低设置拒绝编译

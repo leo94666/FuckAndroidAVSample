@@ -47,7 +47,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             ).request { allGranted, grantedList, deniedList ->
                 if (allGranted){
                    var cmd =FFmpegNative.parseArguments("ffmpeg  -i /sdcard/1.mp4 -vf  \"[in]drawtext=fontfile=/sdcard/MesloLGSNFRegular.ttf:text='%{localtime\\:%T}':x=0:y=0:fontsize=20:fontcolor=yellow:shadowy=2[text];movie=/sdcard/logo.png[wm];[text][wm]overlay=main_w-overlay_w-10:main_h-overlay_h-10[out]\"  -c:v libx264 -an -f mp4 /sdcard/output.mp4 -y")
-                    cmd=FFmpegNative.parseArguments("ffprobe")
+                   // cmd=FFmpegNative.parseArguments("ffprobe")
 
                     FFmpegKits.exec(
                         cmd,

@@ -7,7 +7,6 @@
 
 
 #include <GLES3/gl3.h>
-#include "../logger/logger.h"
 #include "GLUtils.h"
 
 class TriangleSample {

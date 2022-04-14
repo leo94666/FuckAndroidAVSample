@@ -2,6 +2,7 @@
 // Created by liyang on 2022/4/6.
 //
 
+#include <logger.h>
 #include "SuperGLRenderContext.h"
 
 SuperGLRenderContext* SuperGLRenderContext::m_pContext = nullptr;

@@ -5,7 +5,6 @@
 #ifndef AV_GLUTILS_H
 #define AV_GLUTILS_H
 #include <GLES3/gl3.h>
-#include "../logger/logger.h"
 #include <malloc.h>
 
 

@@ -8,11 +8,14 @@
 
 #include <jni.h>
 #include <libavutil/ffversion.h>
+#include "cpu-features.h"
 
 #define NATIVE_FFMPEG_CLASS_NAME "com/top/ffmpeg/ffmpeg/FFmpegNative"
 
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 JNIEXPORT void JNICALL enableNativeRedirection(JNIEnv *env, jobject instance) {
 
@@ -31,8 +34,10 @@ JNIEXPORT void JNICALL getNativeLogLevel(JNIEnv *env, jobject instance) {
 }
 
 JNIEXPORT jstring JNICALL getNativeFFmpegVersion(JNIEnv *env, jobject instance) {
+    //return  (*env)->NewStringUTF(env, FFMPEG_VERSION);
     return env->NewStringUTF(FFMPEG_VERSION);
 }
+
 
 JNIEXPORT void JNICALL getNativeVersion(JNIEnv *env, jobject instance) {
 
@@ -71,7 +76,9 @@ JNIEXPORT void JNICALL messagesInTransmit(JNIEnv *env, jobject instance) {
 }
 
 
-
+#ifdef __cplusplus
+}
+#endif
 
 /** Prototypes of native functions defined by Config class. */
 JNINativeMethod ffmpegNativeMethods[] = {

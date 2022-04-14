@@ -9,7 +9,7 @@ int num = 0;
 
 
 void *thread(void *arg) {   //执行
-    int result = ffmpeg(num, argvs);
+    int result = ffmpeg_execute(num, argvs);
     ffmpeg_thread_exit(result);
     return ((void *) 0);
 }

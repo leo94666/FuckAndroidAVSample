@@ -1,5 +1,9 @@
+#include <iostream>
+#include <libavutil/log.h>
 #include "android/log.h"
 
+using namespace std;
+#include <jni.h>
 
 #define FF_LOG_TAG     "FFmpeg_C_Leo_Log"
 
@@ -29,6 +33,10 @@
 
 #define LOGE(format, ...)  __android_log_print(ANDROID_LOG_ERROR, FF_LOG_TAG, format, ##__VA_ARGS__)
 #define LOGI(format, ...)  __android_log_print(ANDROID_LOG_INFO,  FF_LOG_TAG, format, ##__VA_ARGS__)
+#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, FF_LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, FF_LOG_TAG, __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, FF_LOG_TAG, __VA_ARGS__)
+
 
 
 

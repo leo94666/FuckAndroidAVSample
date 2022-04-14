@@ -7,7 +7,6 @@
 
 
 #include <stdint.h>
-#include "../logger/logger.h"
 #include "ImageDef.h"
 #include "TriangleSample.h"
 #include <GLES3/gl3.h>
