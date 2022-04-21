@@ -5,6 +5,7 @@
 #ifndef AV_ABIDETECT_H
 #define AV_ABIDETECT_H
 
+#include <config.h>
 #include "cpu-features.h"
 
 
@@ -23,18 +24,24 @@
 /** Represents not supported ABIs. */
 #define ABI_UNKNOWN "unknown"
 
+#define NATIVE_ABI_DETECT_CLASS_NAME "com/top/ffmpeg/gles/SuperNativeRender"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 JNIEXPORT jstring JNICALL getNativeAbi(JNIEnv *env, jclass object) {
 #ifdef FFMPEG_KIT_ARM_V7A
-    return (*env)->NewStringUTF(env, "arm-v7a");
+    return env->NewStringUTF("arm-v7a");
 #elif FFMPEG_KIT_ARM64_V8A
-    return (*env)->NewStringUTF(env, "arm64-v8a");
+    return env->NewStringUTF("arm64-v8a");
 #elif FFMPEG_KIT_X86
-    return (*env)->NewStringUTF(env, "x86");
+    return env->NewStringUTF("x86");
 #elif FFMPEG_KIT_X86_64
-    return (*env)->NewStringUTF(env, "x86_64");
+    return env->NewStringUTF( "x86_64");
 #else
-    return (*env)->NewStringUTF(env, "unknown");
+    return env->NewStringUTF("unknown");
 #endif
 }
 
@@ -46,22 +53,22 @@ JNIEXPORT jstring JNICALL getNativeCpuAbi(JNIEnv *env, jclass object) {
 
         if (features & ANDROID_CPU_ARM_FEATURE_ARMv7) {
             if (features & ANDROID_CPU_ARM_FEATURE_NEON) {
-                return (*env)->NewStringUTF(env, ABI_ARMV7A_NEON);
+                return env->NewStringUTF(ABI_ARMV7A_NEON);
             } else {
-                return (*env)->NewStringUTF(env, ABI_ARMV7A);
+                return env->NewStringUTF(ABI_ARMV7A);
             }
         } else {
-            return (*env)->NewStringUTF(env, ABI_ARM);
+            return env->NewStringUTF(ABI_ARM);
         }
 
     } else if (family == ANDROID_CPU_FAMILY_ARM64) {
-        return (*env)->NewStringUTF(env, ABI_ARM64_V8A);
+        return env->NewStringUTF(ABI_ARM64_V8A);
     } else if (family == ANDROID_CPU_FAMILY_X86) {
-        return (*env)->NewStringUTF(env, ABI_X86);
+        return env->NewStringUTF(ABI_X86);
     } else if (family == ANDROID_CPU_FAMILY_X86_64) {
-        return (*env)->NewStringUTF(env, ABI_X86_64);
+        return env->NewStringUTF(ABI_X86_64);
     } else {
-        return (*env)->NewStringUTF(env, ABI_UNKNOWN);
+        return env->NewStringUTF(ABI_UNKNOWN);
     }
 }
 
@@ -74,14 +81,13 @@ JNIEXPORT jboolean JNICALL isNativeLTSBuild(JNIEnv *env, jclass object) {
 }
 
 JNIEXPORT jstring JNICALL getNativeBuildConf(JNIEnv *env, jclass object) {
-    return (*env)->NewStringUTF(env, FFMPEG_CONFIGURATION);
+    return env->NewStringUTF(FFMPEG_CONFIGURATION);
 }
 
-/** Full name of the Java class that owns native functions in this file. */
+#ifdef __cplusplus
+}
+#endif
 
-#define NATIVE_ABI_CLASS_NAME "com/top/ffmpeg/ffmpeg/AbiDetect"
-
-/** Prototypes of native functions defined by this file. */
 JNINativeMethod abiDetectMethods[] = {
         {"getNativeAbi",       "()Ljava/lang/String;", (void *) getNativeAbi},
         {"getNativeCpuAbi",    "()Ljava/lang/String;", (void *) getNativeCpuAbi},

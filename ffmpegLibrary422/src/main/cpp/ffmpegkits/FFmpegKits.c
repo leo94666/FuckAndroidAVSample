@@ -6,7 +6,6 @@
 #include "../log/android_log.h"
 #include "FFmpegKits.h"
 #include "../ffmpeg/ffmpeg_info.h"
-#include "../abii/Abidetect.h"
 
 static JavaVM *jvm = NULL;
 

@@ -1,0 +1,1 @@
+ffmpeg  -i  /Users/liyang/c/data/mp4/in.mp4 -s 1920x1080  -b:v 1M  -r 20 /Users/liyang/c/data/mp4/in_ffmpeg.mp4

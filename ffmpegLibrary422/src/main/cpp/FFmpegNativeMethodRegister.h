@@ -8,7 +8,6 @@
 
 #include <jni.h>
 #include <libavutil/ffversion.h>
-#include "cpu-features.h"
 
 #define NATIVE_FFMPEG_CLASS_NAME "com/top/ffmpeg/ffmpeg/FFmpegNative"
 

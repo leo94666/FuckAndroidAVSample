@@ -6,9 +6,15 @@ include_directories(abii)
 include_directories(logger)
 include_directories(include)
 
-include(AndroidNdkModules)
-android_ndk_import_module_cpufeatures()
+#include(AndroidNdkModules)
+#android_ndk_import_module_cpufeatures()
+#set(CPUFEATURES_LIBRARIES cpufeatures)
 
+#add_subdirectory(ijkmedia)
+# 查找日志库
+find_library(
+        log-lib
+        log)
 
 add_library(ffmpeg
         SHARED
@@ -25,25 +31,32 @@ add_library(FFmpegKits   # 库名称
         ffmpeg/ffmpeg_info.c
         ffmpegkits/ffmpeg_thread.c
         fftools/cmdutils.c
-        #fftools/ffprobe.c
         fftools/ffmpeg.c
         fftools/ffmpeg_filter.c
         fftools/ffmpeg_opt.c
         fftools/ffmpeg_hw.c)            # 编译进库的源码
 
-
-# 查找日志库
-find_library(
-        log-lib
-        log)
-
-
 target_link_libraries( # Specifies the target library.
         FFmpegKits
         #下面这些是链接的库名称（其实就是so文件去掉前面的lib和后面的.so）
-        cpufeatures
         ffmpeg
         ${log-lib})
+
+
+## 编译一个ffmpeg-cmd库
+#add_library(ffprobe   # 库名称
+#        SHARED             # 库类型
+#        ffmpegkits/FFmpegKits.c
+#        ffmpeg/ffmpeg_info.c
+#        ffmpegkits/ffmpeg_thread.c
+#        fftools/cmdutils.c
+#        fftools/ffprobe.c)            # 编译进库的源码
+#
+#target_link_libraries( # Specifies the target library.
+#        ffprobe
+#        #下面这些是链接的库名称（其实就是so文件去掉前面的lib和后面的.so）
+#        ffmpeg
+#        ${log-lib})
 
 
 #OpenGles

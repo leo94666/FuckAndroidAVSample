@@ -5017,7 +5017,8 @@ int ffmpeg_execute(int argc, char **argv) {
                "bench: utime=%0.3fs stime=%0.3fs rtime=%0.3fs\n",
                utime / 1000000.0, stime / 1000000.0, rtime / 1000000.0);
     }
-    av_log(NULL, AV_LOG_DEBUG, "%"PRIu64" frames successfully decoded, %"PRIu64" decoding errors\n", decode_error_stat[0], decode_error_stat[1]);
+    av_log(NULL, AV_LOG_DEBUG, "%"PRIu64" frames successfully decoded, %"PRIu64" decoding errors\n",
+           decode_error_stat[0], decode_error_stat[1]);
     if ((decode_error_stat[0] + decode_error_stat[1]) * max_error_rate < decode_error_stat[1])
         exit_program(69);
 

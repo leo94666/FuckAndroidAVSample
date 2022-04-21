@@ -7,7 +7,7 @@
 #include "gles/SuperGLRenderContext.h"
 #include "OpenGLNativeMethodRegister.h"
 #include "FFmpegNativeMethodRegister.h"
-#include "abii/Abidetect.h"
+//#include "abii/Abidetect.h"
 
 static int
 RegisterNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *methods, int methodNum) {
@@ -54,12 +54,12 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *jvm, void *p) {
     }
 
     jint regRet = JNI_ERR;
-    regRet = RegisterNativeMethods(env, NATIVE_ABI_CLASS_NAME, abiDetectMethods,
-                                   sizeof(abiDetectMethods) /
-                                   sizeof(abiDetectMethods[0]));
-    if (regRet != JNI_TRUE) {
-        return JNI_ERR;
-    }
+//    regRet = RegisterNativeMethods(env, NATIVE_ABI_DETECT_CLASS_NAME, abiDetectMethods,
+//                                   sizeof(abiDetectMethods) /
+//                                   sizeof(abiDetectMethods[0]));
+//    if (regRet != JNI_TRUE) {
+//        return JNI_ERR;
+//    }
     regRet = RegisterNativeMethods(env, NATIVE_OPENGL_CLASS_NAME, openGlNativeMethods,
                                    sizeof(openGlNativeMethods) /
                                    sizeof(openGlNativeMethods[0]));
@@ -80,6 +80,7 @@ JNIEXPORT void JNI_OnUnload(JavaVM *jvm, void *p) {
     if (jvm->GetEnv((void **) (&env), JNI_VERSION_1_6) != JNI_OK) {
         return;
     }
+    //UnregisterNativeMethods(env, NATIVE_ABI_DETECT_CLASS_NAME);
     UnregisterNativeMethods(env, NATIVE_OPENGL_CLASS_NAME);
     UnregisterNativeMethods(env, NATIVE_FFMPEG_CLASS_NAME);
 }
