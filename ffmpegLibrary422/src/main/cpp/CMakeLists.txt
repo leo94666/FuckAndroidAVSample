@@ -5,6 +5,7 @@ project("ffmpegLibrary422")
 include_directories(abii)
 include_directories(logger)
 include_directories(include)
+include_directories(ffmpeg2)
 
 #include(AndroidNdkModules)
 #android_ndk_import_module_cpufeatures()
@@ -30,6 +31,10 @@ add_library(FFmpegKits   # 库名称
         ffmpegkits/FFmpegKits.c
         ffmpeg/ffmpeg_info.c
         ffmpegkits/ffmpeg_thread.c
+        ffmpeg2/ffmpegkit.c
+        ffmpeg2/ffprobekit.c
+        ffmpeg2/ffmpegkit_abidetect.c
+        ffmpeg2/ffmpegkit_exception.c
         fftools/cmdutils.c
         fftools/ffmpeg.c
         fftools/ffmpeg_filter.c
@@ -43,12 +48,12 @@ target_link_libraries( # Specifies the target library.
         ${log-lib})
 
 
-## 编译一个ffmpeg-cmd库
+# 编译一个ffmpeg-cmd库
 #add_library(ffprobe   # 库名称
 #        SHARED             # 库类型
 #        ffmpegkits/FFmpegKits.c
 #        ffmpeg/ffmpeg_info.c
-#        ffmpegkits/ffmpeg_thread.c
+#        ffmpegkits/ffprobe_thread.c
 #        fftools/cmdutils.c
 #        fftools/ffprobe.c)            # 编译进库的源码
 #
