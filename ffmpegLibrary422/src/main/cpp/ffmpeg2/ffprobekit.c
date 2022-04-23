@@ -31,8 +31,11 @@ int ffprobe_execute(int argc, char **argv);
 
 extern int configuredLogLevel;
 extern __thread volatile long globalSessionId;
+
 extern void addSession(long sessionId);
+
 extern void removeSession(long sessionId);
+
 extern void resetMessagesInTransmit(long sessionId);
 
 /**
@@ -44,7 +47,10 @@ extern void resetMessagesInTransmit(long sessionId);
  * @param stringArray reference to the object holding FFprobe command arguments
  * @return zero on successful execution, non-zero on error
  */
-JNIEXPORT jint JNICALL Java_com_arthenica_ffmpegkit_FFmpegKitConfig_nativeFFprobeExecute(JNIEnv *env, jclass object, jlong id, jobjectArray stringArray) {
+JNIEXPORT jint JNICALL
+nativeFFprobeExecute(JNIEnv *env, jclass object,
+                                                                  jlong id,
+                                                                  jobjectArray stringArray) {
     jstring *tempArray = NULL;
     int argumentCount = 1;
     char **argv = NULL;
@@ -63,8 +69,8 @@ JNIEXPORT jint JNICALL Java_com_arthenica_ffmpegkit_FFmpegKitConfig_nativeFFprob
      *
      * ffprobe <arguments>
      */
-    argv = (char **)av_malloc(sizeof(char*) * (argumentCount));
-    argv[0] = (char *)av_malloc(sizeof(char) * (strlen(LIB_NAME) + 1));
+    argv = (char **) av_malloc(sizeof(char *) * (argumentCount));
+    argv[0] = (char *) av_malloc(sizeof(char) * (strlen(LIB_NAME) + 1));
     strcpy(argv[0], LIB_NAME);
 
     // PREPARE ARRAY ELEMENTS

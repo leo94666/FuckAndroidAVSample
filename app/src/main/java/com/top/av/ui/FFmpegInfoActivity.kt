@@ -8,7 +8,8 @@ import com.top.arch.base.BaseActivity
 import com.top.av.R
 import com.top.av.databinding.ActivityFfmpegInfoBinding
 import com.top.ffmpeg.FFmpegKits
-import com.top.ffmpeg.ffmpeg.FFmpegNative
+import com.top.ffmpeg.ffmpeg.AbiDetect
+import com.top.ffmpeg.ffmpeg.FFmpegKit
 import kotlinx.android.synthetic.main.activity_ffmpeg_info.*
 
 public class FFmpegInfoActivity : BaseActivity<ActivityFfmpegInfoBinding>() {
@@ -20,8 +21,13 @@ public class FFmpegInfoActivity : BaseActivity<ActivityFfmpegInfoBinding>() {
     }
 
     override fun init(root: View?) {
-        mDataBinding.tvFfmpegVersion.text =
-            String.format(resources.getString(R.string.ffmpeg_version,FFmpegNative.ffmpegVersion()))
+        mDataBinding.tvAbi.text =
+            String.format(resources.getString(R.string.abi, AbiDetect.getAbi()))
+        mDataBinding.tvCpuAbi.text =
+            String.format(resources.getString(R.string.abi, AbiDetect.getCpuAbi()))
+
+//        mDataBinding.tvFfmpegVersion.text =
+//            String.format(resources.getString(R.string.ffmpeg_version,FFmpegKit.execute("ffmpeg -v")))
     }
 
     fun Run(view: android.view.View) {
@@ -37,6 +43,7 @@ public class FFmpegInfoActivity : BaseActivity<ActivityFfmpegInfoBinding>() {
 //            }
 //        })
     }
+
     fun urlProtocol(view: android.view.View) {
         tv_result.text = FFmpegKits.urlProtocolInfo()
     }

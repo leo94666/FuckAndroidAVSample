@@ -35,7 +35,8 @@ import java.util.Locale;
  */
 public class NativeLoader {
 
-    static final String[] FFMPEG_LIBRARIES = {"avutil", "swscale", "swresample", "avcodec", "avformat", "avfilter", "avdevice"};
+    //static final String[] FFMPEG_LIBRARIES = {"avutil", "swscale", "swresample", "avcodec", "avformat", "avfilter", "avdevice"};
+    static final String[] FFMPEG_LIBRARIES = {"ffmpeg"};
 
     static final String[] LIBRARIES_LINKED_WITH_CXX = {"openh264", "rubberband", "snappy", "srt", "tesseract", "x265", "zimg"};
 

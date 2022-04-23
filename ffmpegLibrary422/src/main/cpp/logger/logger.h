@@ -4,6 +4,7 @@
 
 using namespace std;
 #include <jni.h>
+#include "android/log.h"
 
 #define FF_LOG_TAG     "FFmpeg_C_Leo_Log"
 

@@ -122,6 +122,11 @@ const int program_birth_year = 2000;
 
 static FILE *vstats_file;
 
+__thread int64_t last_time = -1;
+__thread int64_t keyboard_last_time = 0;
+__thread int first_report = 1;
+__thread int qp_histogram[52];
+
 void (*report_callback)(int, float, float, int64_t, int, double, double) = NULL;
 
 const char *const forced_keyframes_const_names[] = {
@@ -152,6 +157,8 @@ static int nb_frames_dup = 0;
 static unsigned dup_warning = 1000;
 static int nb_frames_drop = 0;
 static int64_t decode_error_stat[2];
+//add by leo
+__thread unsigned nb_output_dumped = 0;
 
 static int want_sdp = 1;
 
@@ -185,6 +192,20 @@ static int restore_tty;
 static void free_input_threads(void);
 
 #endif
+
+
+extern volatile int handleSIGQUIT;
+extern volatile int handleSIGINT;
+extern volatile int handleSIGTERM;
+extern volatile int handleSIGXCPU;
+extern volatile int handleSIGPIPE;
+
+extern __thread volatile long globalSessionId;
+
+extern void cancelSession(long sessionId);
+
+extern int cancelRequested(long sessionId);
+
 
 /* sub2video hack:
    Convert subtitles to video with alpha to insert them in filter graphs.
@@ -341,11 +362,19 @@ void term_exit(void) {
     term_exit_sigsafe();
 }
 
+//static volatile int received_sigterm = 0;
+//static volatile int received_nb_signals = 0;
+//static atomic_int transcode_init_done = ATOMIC_VAR_INIT(0);
+//static volatile int ffmpeg_exited = 0;
+//static int main_return_code = 0;
+
 static volatile int received_sigterm = 0;
 static volatile int received_nb_signals = 0;
-static atomic_int transcode_init_done = ATOMIC_VAR_INIT(0);
-static volatile int ffmpeg_exited = 0;
-static int main_return_code = 0;
+__thread atomic_int transcode_init_done = ATOMIC_VAR_INIT(0);
+__thread volatile int ffmpeg_exited = 0;
+__thread volatile int main_ffmpeg_return_code = 0;
+__thread int64_t copy_ts_first_pts = AV_NOPTS_VALUE;
+extern __thread volatile int longjmp_value;
 
 static void
 sigterm_handler(int sig) {
@@ -820,7 +849,7 @@ static void write_packet(OutputFile *of, AVPacket *pkt, OutputStream *ost, int u
     ret = av_interleaved_write_frame(s, pkt);
     if (ret < 0) {
         print_error("av_interleaved_write_frame()", ret);
-        main_return_code = 1;
+        main_ffmpeg_return_code = 1;
         close_all_output_streams(ost, MUXER_FINISHED | ENCODER_FINISHED, ENCODER_FINISHED);
     }
     av_packet_unref(pkt);
@@ -4939,9 +4968,63 @@ static int64_t getmaxrss(void) {
 }
 
 static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl) {
+
 }
 
 
+//add by leo
+void ffmpeg_var_cleanup() {
+    main_ffmpeg_return_code = 0;
+    longjmp_value = 0;
+    received_sigterm = 0;
+    received_nb_signals = 0;
+    ffmpeg_exited = 0;
+    copy_ts_first_pts = AV_NOPTS_VALUE;
+
+    run_as_daemon = 0;
+    nb_frames_dup = 0;
+    dup_warning = 1000;
+    nb_frames_drop = 0;
+    nb_output_dumped = 0;
+
+    want_sdp = 1;
+
+    progress_avio = NULL;
+
+    input_streams = NULL;
+    nb_input_streams = 0;
+    input_files = NULL;
+    nb_input_files = 0;
+
+    output_streams = NULL;
+    nb_output_streams = 0;
+    output_files = NULL;
+    nb_output_files = 0;
+
+    filtergraphs = NULL;
+    nb_filtergraphs = 0;
+
+    last_time = -1;
+    keyboard_last_time = 0;
+    first_report = 1;
+}
+
+void set_report_callback(void (*callback)(int, float, float, int64_t, int, double, double)) {
+    report_callback = callback;
+}
+
+void cancel_operation(long id) {
+    if (id == 0) {
+        sigterm_handler(SIGINT);
+    } else {
+        cancelSession(id);
+    }
+}
+
+__thread OptionDef *ffmpeg_options = NULL;
+
+
+//modify by leo, main->ffmpeg_excute
 int ffmpeg_execute(int argc, char **argv) {
     //1.局部变量声明
     int i, ret;
@@ -5022,6 +5105,6 @@ int ffmpeg_execute(int argc, char **argv) {
     if ((decode_error_stat[0] + decode_error_stat[1]) * max_error_rate < decode_error_stat[1])
         exit_program(69);
 
-    exit_program(received_nb_signals ? 255 : main_return_code);
-    return main_return_code;
+    exit_program(received_nb_signals ? 255 : main_ffmpeg_return_code);
+    return main_ffmpeg_return_code;
 }

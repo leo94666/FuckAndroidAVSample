@@ -63,6 +63,9 @@
 #if HAVE_SYS_RESOURCE_H
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <setjmp.h>
+#include <ffmpegkit_exception.h>
+
 #endif
 #ifdef _WIN32
 #include <windows.h>
@@ -77,6 +80,7 @@ AVDictionary *format_opts, *codec_opts, *resample_opts;
 static FILE *report_file;
 static int report_file_level = AV_LOG_DEBUG;
 int hide_banner = 0;
+__thread volatile int longjmp_value = 0;
 
 enum show_muxdemuxers {
     SHOW_DEFAULT,
@@ -140,7 +144,9 @@ void exit_program(int ret)
     if (program_exit)
         program_exit(ret);
     // 退出线程(该函数后面定义) edit by leo
-    ffmpeg_thread_exit(ret);
+    //ffmpeg_thread_exit(ret);
+    longjmp_value = ret;
+    longjmp(ex_buf__, ret);
     //exit(ret);
 }
 
