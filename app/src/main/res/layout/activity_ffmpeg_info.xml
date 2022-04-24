@@ -12,21 +12,6 @@
             android:layout_margin="@dimen/dp_10"
             app:layout_constraintTop_toTopOf="parent"
             android:orientation="vertical">
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tv_abi"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/abi"
-                android:textColor="@color/white" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tv_cpu_abi"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/cpu_abi"
-                android:textColor="@color/white" />
-
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tv_ffmpeg_version"
                 android:layout_width="match_parent"

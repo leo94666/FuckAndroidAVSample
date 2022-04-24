@@ -139,7 +139,7 @@ JNIEXPORT int JNICALL messagesInTransmit(JNIEnv *env, jclass object, jlong id);
 #define NATIVE_FFMPEG_CLASS_NAME "com/top/ffmpeg/ffmpeg/FFmpegKitConfig"
 
 /** Prototypes of native functions defined by Config class. */
-JNINativeMethod ffmpegMethods[] = {
+static JNINativeMethod ffmpegMethods[] = {
         {"enableNativeRedirection",      "()V",                                     (void *) enableNativeRedirection},
         {"disableNativeRedirection",     "()V",                                     (void *) disableNativeRedirection},
         {"setNativeLogLevel",            "(I)V",                                    (void *) setNativeLogLevel},

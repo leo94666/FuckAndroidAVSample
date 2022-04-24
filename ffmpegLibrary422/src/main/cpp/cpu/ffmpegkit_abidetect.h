@@ -22,7 +22,7 @@
 
 #include <jni.h>
 #include <config.h>
-#include <cpu-features.h>
+#include <ndk_compat/cpu-features.h>
 
 /** Represents armeabi-v7a ABI with NEON support. */
 #define ABI_ARMV7A_NEON "armeabi-v7a-neon"
@@ -70,7 +70,7 @@ JNIEXPORT jstring JNICALL getNativeAbi(JNIEnv *env, jobject instance) {
 #elif FFMPEG_KIT_X86_64
     return env->NewStringUTF( "x86_64");
 #else
-    return env->NewStringUTF("unknown");
+    return env->NewStringUTF("unknown: ");
 #endif
 
 }
@@ -87,7 +87,6 @@ JNIEXPORT jstring JNICALL getNativeCpuAbi(JNIEnv *env, jobject instance) {
 
     if (family == ANDROID_CPU_FAMILY_ARM) {
         uint64_t features = android_getCpuFeatures();
-
         if (features & ANDROID_CPU_ARM_FEATURE_ARMv7) {
             if (features & ANDROID_CPU_ARM_FEATURE_NEON) {
                 return env->NewStringUTF(ABI_ARMV7A_NEON);
@@ -108,6 +107,7 @@ JNIEXPORT jstring JNICALL getNativeCpuAbi(JNIEnv *env, jobject instance) {
         return env->NewStringUTF(ABI_UNKNOWN);
     }
 }
+
 
 /**
  * Returns whether FFmpegKit release is a long term release or not.
@@ -141,10 +141,10 @@ JNIEXPORT jstring JNICALL getNativeBuildConf(JNIEnv *env, jobject instance) {
 
 /** Prototypes of native functions defined by this file. */
 static JNINativeMethod abiDetectMethods[] = {
-        {"getNativeAbi",       "()Ljava/lang/String;", (void *) getNativeAbi},
-        {"getNativeCpuAbi",    "()Ljava/lang/String;", (void *) getNativeCpuAbi},
-        {"isNativeLTSBuild",   "()Z",                  (void *) isNativeLTSBuild},
-        {"getNativeBuildConf", "()Ljava/lang/String;", (void *) getNativeBuildConf}
+        {"getNativeAbi",       "()Ljava/lang/String;",  (void *) getNativeAbi},
+        {"getNativeCpuAbi",    "()Ljava/lang/String;",  (void *) getNativeCpuAbi},
+        {"isNativeLTSBuild",   "()Z",                   (void *) isNativeLTSBuild},
+        {"getNativeBuildConf", "()Ljava/lang/String;",  (void *) getNativeBuildConf}
 };
 
 

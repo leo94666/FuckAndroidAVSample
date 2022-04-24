@@ -19,36 +19,37 @@
 
 #include <pthread.h>
 #include <stdatomic.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
+#include "../fftools/ffmpeg.h"
+#include "../log/android_log.h"
 #include "config.h"
+#include "ffmpegkit.h"
 #include "libavcodec/jni.h"
 #include "libavutil/bprint.h"
 #include "libavutil/file.h"
-#include "../fftools/ffmpeg.h"
-#include "ffmpegkit.h"
-#include "ffprobekit.h"
-#include "../log/android_log.h"
 
-# define LogType 1
-# define StatisticsType 2
-
+#define LogType 1
+#define StatisticsType 2
+#ifdef __cplusplus
+extern "C" {
+#endif
 /** Callback data structure */
 struct CallbackData {
-    int type;                 // 1 (log callback) or 2 (statistics callback)
-    long sessionId;           // session identifier
+    int type;       // 1 (log callback) or 2 (statistics callback)
+    long sessionId; // session identifier
 
-    int logLevel;             // log level
-    AVBPrint logData;         // log data
+    int logLevel;     // log level
+    AVBPrint logData; // log data
 
-    int statisticsFrameNumber;        // statistics frame number
-    float statisticsFps;              // statistics fps
-    float statisticsQuality;          // statistics quality
-    int64_t statisticsSize;           // statistics size
-    int statisticsTime;               // statistics time
-    double statisticsBitrate;         // statistics bitrate
-    double statisticsSpeed;           // statistics speed
+    int statisticsFrameNumber; // statistics frame number
+    float statisticsFps;       // statistics fps
+    float statisticsQuality;   // statistics quality
+    int64_t statisticsSize;    // statistics size
+    int statisticsTime;        // statistics time
+    double statisticsBitrate;  // statistics bitrate
+    double statisticsSpeed;    // statistics speed
 
     struct CallbackData *next;
 };
@@ -93,7 +94,6 @@ static jclass stringClass;
 /** Global reference of String constructor in Java */
 static jmethodID stringConstructor;
 
-
 /** Full name of String class */
 const char *stringClassName = "java/lang/String";
 
@@ -110,14 +110,13 @@ __thread volatile long globalSessionId = 0;
 /** Holds the default log level */
 int configuredLogLevel = AV_LOG_INFO;
 
-
 /** Forward declaration for function defined in fftools_ffmpeg.c */
 int ffmpeg_execute(int argc, char **argv);
 
 static const char *avutil_log_get_level_str(int level) {
     switch (level) {
-//        case AV_LOG_STDERR:
-//            return "stderr";
+        //        case AV_LOG_STDERR:
+        //            return "stderr";
         case AV_LOG_QUIET:
             return "quiet";
         case AV_LOG_DEBUG:
@@ -139,9 +138,9 @@ static const char *avutil_log_get_level_str(int level) {
     }
 }
 
-static void
-avutil_log_format_line(void *avcl, int level, const char *fmt, va_list vl, AVBPrint part[4],
-                       int *print_prefix) {
+static void avutil_log_format_line(void *avcl, int level, const char *fmt,
+                                   va_list vl, AVBPrint part[4],
+                                   int *print_prefix) {
     int flags = av_log_get_flags();
     AVClass *avc = avcl ? *(AVClass **) avcl : NULL;
     av_bprint_init(part + 0, 0, 1);
@@ -151,15 +150,14 @@ avutil_log_format_line(void *avcl, int level, const char *fmt, va_list vl, AVBPr
 
     if (*print_prefix && avc) {
         if (avc->parent_log_context_offset) {
-            AVClass **parent = *(AVClass ***) (((uint8_t *) avcl) +
-                                               avc->parent_log_context_offset);
+            AVClass **parent =
+                    *(AVClass ***) (((uint8_t *) avcl) + avc->parent_log_context_offset);
             if (parent && *parent) {
-                av_bprintf(part + 0, "[%s @ %p] ",
-                           (*parent)->item_name(parent), parent);
+                av_bprintf(part + 0, "[%s @ %p] ", (*parent)->item_name(parent),
+                           parent);
             }
         }
-        av_bprintf(part + 1, "[%s @ %p] ",
-                   avc->item_name(avcl), avcl);
+        av_bprintf(part + 1, "[%s @ %p] ", avc->item_name(avcl), avcl);
     }
 
     if (*print_prefix && (level > AV_LOG_QUIET) && (flags & AV_LOG_PRINT_LEVEL))
@@ -168,7 +166,9 @@ avutil_log_format_line(void *avcl, int level, const char *fmt, va_list vl, AVBPr
     av_vbprintf(part + 3, fmt, vl);
 
     if (*part[0].str || *part[1].str || *part[2].str || *part[3].str) {
-        char lastc = part[3].len && part[3].len <= part[3].size ? part[3].str[part[3].len - 1] : 0;
+        char lastc = part[3].len && part[3].len <= part[3].size
+                     ? part[3].str[part[3].len - 1]
+                     : 0;
         *print_prefix = lastc == '\n' || lastc == '\r';
     }
 }
@@ -206,22 +206,16 @@ void monitorInit() {
     pthread_condattr_destroy(&cattributes);
 }
 
-void mutexUnInit() {
-    pthread_mutex_destroy(&lockMutex);
-}
+void mutexUnInit() { pthread_mutex_destroy(&lockMutex); }
 
 void monitorUnInit() {
     pthread_mutex_destroy(&monitorMutex);
     pthread_cond_destroy(&monitorCondition);
 }
 
-void mutexLock() {
-    pthread_mutex_lock(&lockMutex);
-}
+void mutexLock() { pthread_mutex_lock(&lockMutex); }
 
-void mutexUnlock() {
-    pthread_mutex_unlock(&lockMutex);
-}
+void mutexUnlock() { pthread_mutex_unlock(&lockMutex); }
 
 void monitorWait(int milliSeconds) {
     struct timeval tp;
@@ -260,7 +254,8 @@ void monitorNotify() {
 void logCallbackDataAdd(int level, AVBPrint *data) {
 
     // CREATE DATA STRUCT FIRST
-    struct CallbackData *newData = (struct CallbackData *) av_malloc(sizeof(struct CallbackData));
+    struct CallbackData *newData =
+            (struct CallbackData *) av_malloc(sizeof(struct CallbackData));
     newData->type = LogType;
     newData->sessionId = globalSessionId;
     newData->logLevel = level;
@@ -290,17 +285,20 @@ void logCallbackDataAdd(int level, AVBPrint *data) {
 
     monitorNotify();
 
-    atomic_fetch_add(&sessionInTransitMessageCountMap[globalSessionId % SESSION_MAP_SIZE], 1);
+    atomic_fetch_add(
+            &sessionInTransitMessageCountMap[globalSessionId % SESSION_MAP_SIZE], 1);
 }
 
 /**
  * Adds statistics data to the end of callback data list.
  */
-void statisticsCallbackDataAdd(int frameNumber, float fps, float quality, int64_t size, int time,
-                               double bitrate, double speed) {
+void statisticsCallbackDataAdd(int frameNumber, float fps, float quality,
+                               int64_t size, int time, double bitrate,
+                               double speed) {
 
     // CREATE DATA STRUCT FIRST
-    struct CallbackData *newData = (struct CallbackData *) av_malloc(sizeof(struct CallbackData));
+    struct CallbackData *newData =
+            (struct CallbackData *) av_malloc(sizeof(struct CallbackData));
     newData->type = StatisticsType;
     newData->sessionId = globalSessionId;
     newData->statisticsFrameNumber = frameNumber;
@@ -335,7 +333,8 @@ void statisticsCallbackDataAdd(int frameNumber, float fps, float quality, int64_
 
     monitorNotify();
 
-    atomic_fetch_add(&sessionInTransitMessageCountMap[globalSessionId % SESSION_MAP_SIZE], 1);
+    atomic_fetch_add(
+            &sessionInTransitMessageCountMap[globalSessionId % SESSION_MAP_SIZE], 1);
 }
 
 /**
@@ -363,7 +362,8 @@ struct CallbackData *callbackDataRemove() {
         struct CallbackData *nextHead = currentData->next;
         if (nextHead == NULL) {
             if (callbackDataHead != callbackDataTail) {
-                LOGE("Head and tail callback data pointers do not match for single callback data element. This can cause memory leak.");
+                LOGE("Head and tail callback data pointers do not match for single "
+                     "callback data element. This can cause memory leak.");
             } else {
                 callbackDataTail = NULL;
             }
@@ -398,7 +398,8 @@ void cancelSession(long id) {
 }
 
 /**
- * Checks whether a cancel request for the given session id exists in the session map.
+ * Checks whether a cancel request for the given session id exists in the
+ * session map.
  *
  * @param id session id
  * @return 1 if exists, false otherwise
@@ -428,7 +429,8 @@ void resetMessagesInTransmit(long id) {
  * @param format format string
  * @param vargs arguments
  */
-void ffmpegkit_log_callback_function(void *ptr, int level, const char *format, va_list vargs) {
+void ffmpegkit_log_callback_function(void *ptr, int level, const char *format,
+                                     va_list vargs) {
     AVBPrint fullLine;
     AVBPrint part[4];
     int print_prefix = 1;
@@ -452,7 +454,8 @@ void ffmpegkit_log_callback_function(void *ptr, int level, const char *format, v
     avutil_log_sanitize(part[3].str);
 
     // COMBINE ALL 4 LOG PARTS
-    av_bprintf(&fullLine, "%s%s%s%s", part[0].str, part[1].str, part[2].str, part[3].str);
+    av_bprintf(&fullLine, "%s%s%s%s", part[0].str, part[1].str, part[2].str,
+               part[3].str);
 
     if (fullLine.len > 0) {
         logCallbackDataAdd(level, &fullLine);
@@ -476,9 +479,12 @@ void ffmpegkit_log_callback_function(void *ptr, int level, const char *format, v
  * @param bitrate output bit rate in kbits/s
  * @param speed processing speed = processed duration / operation duration
  */
-void ffmpegkit_statistics_callback_function(int frameNumber, float fps, float quality, int64_t size,
-                                            int time, double bitrate, double speed) {
-    statisticsCallbackDataAdd(frameNumber, fps, quality, size, time, bitrate, speed);
+void ffmpegkit_statistics_callback_function(int frameNumber, float fps,
+                                            float quality, int64_t size,
+                                            int time, double bitrate,
+                                            double speed) {
+    statisticsCallbackDataAdd(frameNumber, fps, quality, size, time, bitrate,
+                              speed);
 }
 
 /**
@@ -490,8 +496,7 @@ void *callbackThreadFunction() {
     if (getEnvRc != JNI_OK) {
         if (getEnvRc != JNI_EDETACHED) {
             LOGE("Callback thread failed to GetEnv for class %s with rc %d.\n",
-                 NATIVE_FFMPEG_CLASS_NAME,
-                 getEnvRc);
+                 NATIVE_FFMPEG_CLASS_NAME, getEnvRc);
             return NULL;
         }
 
@@ -502,7 +507,7 @@ void *callbackThreadFunction() {
         }
     }
 
-    //LOGD("Async callback block started.\n");
+    // LOGD("Async callback block started.\n");
 
     while (redirectionEnabled) {
 
@@ -515,7 +520,8 @@ void *callbackThreadFunction() {
                 int size = callbackData->logData.len;
 
                 jbyteArray byteArray = (jbyteArray) (*env)->NewByteArray(env, size);
-                (*env)->SetByteArrayRegion(env, byteArray, 0, size, callbackData->logData.str);
+                (*env)->SetByteArrayRegion(env, byteArray, 0, size,
+                                           callbackData->logData.str);
                 (*env)->CallStaticVoidMethod(env, configClass, logMethod,
                                              (jlong) callbackData->sessionId,
                                              callbackData->logLevel, byteArray);
@@ -528,20 +534,17 @@ void *callbackThreadFunction() {
 
                 // STATISTICS CALLBACK
 
-                (*env)->CallStaticVoidMethod(env, configClass, statisticsMethod,
-                                             (jlong) callbackData->sessionId,
-                                             callbackData->statisticsFrameNumber,
-                                             callbackData->statisticsFps,
-                                             callbackData->statisticsQuality,
-                                             callbackData->statisticsSize,
-                                             callbackData->statisticsTime,
-                                             callbackData->statisticsBitrate,
-                                             callbackData->statisticsSpeed);
-
+                (*env)->CallStaticVoidMethod(
+                        env, configClass, statisticsMethod, (jlong) callbackData->sessionId,
+                        callbackData->statisticsFrameNumber, callbackData->statisticsFps,
+                        callbackData->statisticsQuality, callbackData->statisticsSize,
+                        callbackData->statisticsTime, callbackData->statisticsBitrate,
+                        callbackData->statisticsSpeed);
             }
 
             atomic_fetch_sub(
-                    &sessionInTransitMessageCountMap[callbackData->sessionId % SESSION_MAP_SIZE],
+                    &sessionInTransitMessageCountMap[callbackData->sessionId %
+                                                     SESSION_MAP_SIZE],
                     1);
 
             // CLEAN STRUCT
@@ -555,13 +558,14 @@ void *callbackThreadFunction() {
 
     (*globalVm)->DetachCurrentThread(globalVm);
 
-    //LOGD("Async callback block stopped.\n");
+    // LOGD("Async callback block stopped.\n");
 
     return NULL;
 }
 
 /**
- * Used by saf protocol; is expected to be called from a Java thread, therefore we don't need attach/detach
+ * Used by saf protocol; is expected to be called from a Java thread, therefore
+ * we don't need attach/detach
  */
 int saf_open(int safId) {
     JNIEnv *env = NULL;
@@ -570,7 +574,8 @@ int saf_open(int safId) {
 }
 
 /**
- * Used by saf protocol; is expected to be called from a Java thread, therefore we don't need attach/detach
+ * Used by saf protocol; is expected to be called from a Java thread, therefore
+ * we don't need attach/detach
  */
 int saf_close(int fd) {
     JNIEnv *env = NULL;
@@ -585,9 +590,8 @@ int saf_close(int fd) {
  * @param object reference to the class on which this method is invoked
  * @param level log level
  */
-JNIEXPORT void JNICALL
-setNativeLogLevel(JNIEnv *env, jclass object,
-                  jint level) {
+JNIEXPORT void JNICALL setNativeLogLevel(JNIEnv *env, jclass object,
+                                         jint level) {
     configuredLogLevel = level;
 }
 
@@ -597,7 +601,9 @@ setNativeLogLevel(JNIEnv *env, jclass object,
  * @param env pointer to native method interface
  * @param object reference to the class on which this method is invoked
  */
-JNIEXPORT jint JNICALL
+JNIEXPORT jint
+
+JNICALL
 getNativeLogLevel(JNIEnv *env, jclass object) {
     return configuredLogLevel;
 }
@@ -608,12 +614,12 @@ getNativeLogLevel(JNIEnv *env, jclass object) {
  * @param env pointer to native method interface
  * @param object reference to the class on which this method is invoked
  */
-JNIEXPORT void JNICALL
-enableNativeRedirection(JNIEnv *env, jclass object) {
+JNIEXPORT void JNICALL enableNativeRedirection(JNIEnv *env, jclass object) {
     mutexLock();
 
     if (redirectionEnabled != 0) {
         mutexUnlock();
+
         return;
     }
     redirectionEnabled = 1;
@@ -636,13 +642,13 @@ enableNativeRedirection(JNIEnv *env, jclass object) {
  * @param env pointer to native method interface
  * @param object reference to the class on which this method is invoked
  */
-JNIEXPORT void JNICALL
-disableNativeRedirection(JNIEnv *env, jclass object) {
+JNIEXPORT void JNICALL disableNativeRedirection(JNIEnv *env, jclass object) {
 
     mutexLock();
 
     if (redirectionEnabled != 1) {
         mutexUnlock();
+
         return;
     }
     redirectionEnabled = 0;
@@ -662,8 +668,7 @@ disableNativeRedirection(JNIEnv *env, jclass object) {
  * @param object reference to the class on which this method is invoked
  * @return FFmpeg version string
  */
-JNIEXPORT jstring JNICALL
-getNativeFFmpegVersion(JNIEnv *env, jclass object) {
+JNIEXPORT jstring JNICALL getNativeFFmpegVersion(JNIEnv *env, jclass object) {
     return (*env)->NewStringUTF(env, FFMPEG_VERSION);
 }
 
@@ -674,7 +679,9 @@ getNativeFFmpegVersion(JNIEnv *env, jclass object) {
  * @param object reference to the class on which this method is invoked
  * @return FFmpegKit version string
  */
-JNIEXPORT jstring JNICALL
+JNIEXPORT jstring
+
+JNICALL
 getNativeVersion(JNIEnv *env, jclass object) {
     return (*env)->NewStringUTF(env, FFMPEG_KIT_VERSION);
 }
@@ -688,66 +695,68 @@ getNativeVersion(JNIEnv *env, jclass object) {
  * @param stringArray reference to the object holding FFmpeg command arguments
  * @return zero on successful execution, non-zero on error
  */
-JNIEXPORT jint JNICALL
-nativeFFmpegExecute(JNIEnv *env, jclass object,
-                    jlong id,
-                    jobjectArray stringArray) {
-    jstring *tempArray = NULL;
-    int argumentCount = 1;
-    char **argv = NULL;
+JNIEXPORT jint
 
-    // SETS DEFAULT LOG LEVEL BEFORE STARTING A NEW RUN
-    av_log_set_level(configuredLogLevel);
+    JNICALL
+    nativeFFmpegExecute(JNIEnv *env, jclass object, jlong id,
+                        jobjectArray stringArray) {
+  jstring *tempArray = NULL;
+  int argumentCount = 1;
+  char **argv = NULL;
 
-    if (stringArray) {
-        int programArgumentCount = (*env)->GetArrayLength(env, stringArray);
-        argumentCount = programArgumentCount + 1;
+  // SETS DEFAULT LOG LEVEL BEFORE STARTING A NEW RUN
+  av_log_set_level(configuredLogLevel);
 
-        tempArray = (jstring *) av_malloc(sizeof(jstring) * programArgumentCount);
+  if (stringArray) {
+    int programArgumentCount = (*env)->GetArrayLength(env, stringArray);
+    argumentCount = programArgumentCount + 1;
+
+    tempArray = (jstring *)av_malloc(sizeof(jstring) * programArgumentCount);
+  }
+
+  /* PRESERVE USAGE FORMAT
+   *
+   * ffmpeg <arguments>
+   */
+  argv = (char **)av_malloc(sizeof(char *) * (argumentCount));
+  argv[0] = (char *)av_malloc(sizeof(char) * (strlen(LIB_NAME) + 1));
+  strcpy(argv[0], LIB_NAME);
+
+  // PREPARE ARRAY ELEMENTS
+  if (stringArray) {
+    for (int i = 0; i < (argumentCount - 1); i++) {
+      tempArray[i] =
+          (jstring)(*env)->GetObjectArrayElement(env, stringArray, i);
+      if (tempArray[i] != NULL) {
+        argv[i + 1] = (char *)(*env)->GetStringUTFChars(env, tempArray[i], 0);
+      }
+    }
+  }
+
+  // REGISTER THE ID BEFORE STARTING THE SESSION
+  globalSessionId = (long)id;
+  addSession((long)id);
+
+  resetMessagesInTransmit(globalSessionId);
+
+  // RUN
+  int returnCode = ffmpeg_execute(argumentCount, argv);
+
+  // ALWAYS REMOVE THE ID FROM THE MAP
+  removeSession((long)id);
+
+  // CLEANUP
+  if (tempArray) {
+    for (int i = 0; i < (argumentCount - 1); i++) {
+      (*env)->ReleaseStringUTFChars(env, tempArray[i], argv[i + 1]);
     }
 
-    /* PRESERVE USAGE FORMAT
-     *
-     * ffmpeg <arguments>
-     */
-    argv = (char **) av_malloc(sizeof(char *) * (argumentCount));
-    argv[0] = (char *) av_malloc(sizeof(char) * (strlen(LIB_NAME) + 1));
-    strcpy(argv[0], LIB_NAME);
+    av_free(tempArray);
+  }
+  av_free(argv[0]);
+  av_free(argv);
 
-    // PREPARE ARRAY ELEMENTS
-    if (stringArray) {
-        for (int i = 0; i < (argumentCount - 1); i++) {
-            tempArray[i] = (jstring) (*env)->GetObjectArrayElement(env, stringArray, i);
-            if (tempArray[i] != NULL) {
-                argv[i + 1] = (char *) (*env)->GetStringUTFChars(env, tempArray[i], 0);
-            }
-        }
-    }
-
-    // REGISTER THE ID BEFORE STARTING THE SESSION
-    globalSessionId = (long) id;
-    addSession((long) id);
-
-    resetMessagesInTransmit(globalSessionId);
-
-    // RUN
-    int returnCode = ffmpeg_execute(argumentCount, argv);
-
-    // ALWAYS REMOVE THE ID FROM THE MAP
-    removeSession((long) id);
-
-    // CLEANUP
-    if (tempArray) {
-        for (int i = 0; i < (argumentCount - 1); i++) {
-            (*env)->ReleaseStringUTFChars(env, tempArray[i], argv[i + 1]);
-        }
-
-        av_free(tempArray);
-    }
-    av_free(argv[0]);
-    av_free(argv);
-
-    return returnCode;
+  return returnCode;
 }
 
 /**
@@ -757,9 +766,8 @@ nativeFFmpegExecute(JNIEnv *env, jclass object,
  * @param object reference to the class on which this method is invoked
  * @param id session id
  */
-JNIEXPORT void JNICALL
-nativeFFmpegCancel(JNIEnv *env, jclass object,
-                   jlong id) {
+JNIEXPORT void JNICALL nativeFFmpegCancel(JNIEnv *env, jclass object,
+                                          jlong id) {
     cancel_operation(id);
 }
 
@@ -771,10 +779,10 @@ nativeFFmpegCancel(JNIEnv *env, jclass object,
  * @param ffmpegPipePath full path of ffmpeg pipe
  * @return zero on successful creation, non-zero on error
  */
-JNIEXPORT int JNICALL
-registerNewNativeFFmpegPipe(JNIEnv *env, jclass object,
-                            jstring ffmpegPipePath) {
-    const char *ffmpegPipePathString = (*env)->GetStringUTFChars(env, ffmpegPipePath, 0);
+JNIEXPORT int JNICALL registerNewNativeFFmpegPipe(JNIEnv *env, jclass object,
+                                                  jstring ffmpegPipePath) {
+    const char *ffmpegPipePathString =
+            (*env)->GetStringUTFChars(env, ffmpegPipePath, 0);
 
     return mkfifo(ffmpegPipePathString, S_IRWXU | S_IRWXG | S_IROTH);
 }
@@ -786,10 +794,12 @@ registerNewNativeFFmpegPipe(JNIEnv *env, jclass object,
  * @param object reference to the class on which this method is invoked
  * @return FFmpegKit library build date
  */
-JNIEXPORT jstring JNICALL
+JNIEXPORT jstring
+
+JNICALL
 getNativeBuildDate(JNIEnv *env, jclass object) {
     char buildDate[10];
-    //sprintf(buildDate, "%d", "FFMPEG_KIT_BUILD_DATE");
+    sprintf(buildDate, "%d", 10);
     return (*env)->NewStringUTF(env, buildDate);
 }
 
@@ -802,13 +812,13 @@ getNativeBuildDate(JNIEnv *env, jclass object) {
  * @param variableValue environment variable value
  * @return zero on success, non-zero on error
  */
-JNIEXPORT int JNICALL
-setNativeEnvironmentVariable(JNIEnv *env,
-                             jclass object,
-                             jstring variableName,
-                             jstring variableValue) {
-    const char *variableNameString = (*env)->GetStringUTFChars(env, variableName, 0);
-    const char *variableValueString = (*env)->GetStringUTFChars(env, variableValue, 0);
+JNIEXPORT int JNICALL setNativeEnvironmentVariable(JNIEnv *env, jclass object,
+                                                   jstring variableName,
+                                                   jstring variableValue) {
+    const char *variableNameString =
+            (*env)->GetStringUTFChars(env, variableName, 0);
+    const char *variableValueString =
+            (*env)->GetStringUTFChars(env, variableValue, 0);
 
     int rc = setenv(variableNameString, variableValueString, 1);
 
@@ -818,15 +828,15 @@ setNativeEnvironmentVariable(JNIEnv *env,
 }
 
 /**
- * Registers a new ignored signal. Ignored signals are not handled by the library.
+ * Registers a new ignored signal. Ignored signals are not handled by the
+ * library.
  *
  * @param env pointer to native method interface
  * @param object reference to the class on which this method is invoked
  * @param signum signal number
  */
-JNIEXPORT void JNICALL
-ignoreNativeSignal(JNIEnv *env, jclass object,
-                   jint signum) {
+JNIEXPORT void JNICALL ignoreNativeSignal(JNIEnv *env, jclass object,
+                                          jint signum) {
     if (signum == SIGQUIT) {
         handleSIGQUIT = 0;
     } else if (signum == SIGINT) {
@@ -841,15 +851,99 @@ ignoreNativeSignal(JNIEnv *env, jclass object,
 }
 
 /**
- * Returns the number of native messages which are not transmitted to the Java callbacks for the
- * given session.
+ * Returns the number of native messages which are not transmitted to the Java
+ * callbacks for the given session.
  *
  * @param env pointer to native method interface
  * @param object reference to the class on which this method is invoked
  * @param id session id
  */
-JNIEXPORT int JNICALL
-messagesInTransmit(JNIEnv *env, jclass object,
-                   jlong id) {
+JNIEXPORT int JNICALL messagesInTransmit(JNIEnv *env, jclass object, jlong id) {
     return atomic_load(&sessionInTransitMessageCountMap[id % SESSION_MAP_SIZE]);
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+static int RegisterNativeMethods(JNIEnv *env, const char *className,
+                                 JNINativeMethod *methods, int methodNum) {
+    LOGI("RegisterNativeMethods ffmpeg");
+    jclass clazz = (*env)->FindClass(env, className);
+    if (clazz == NULL) {
+        LOGE("RegisterNativeMethods fail. clazz == NULL");
+        return JNI_FALSE;
+    }
+    if ((*env)->RegisterNatives(env, clazz, methods, methodNum) < 0) {
+        LOGE("RegisterNativeMethods fail");
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
+static void UnregisterNativeMethods(JNIEnv *env, const char *className) {
+    LOGI("UnregisterNativeMethods");
+    jclass clazz = (*env)->FindClass(env, className);
+    if (clazz == NULL) {
+        LOGE("UnregisterNativeMethods fail. clazz == NULL");
+        return;
+    }
+    (*env)->UnregisterNatives(env, clazz);
+}
+
+jint JNI_OnLoad(JavaVM *jvm, void *p) {
+    jint jniRet = JNI_ERR;
+    JNIEnv *env = NULL;
+    if ((*jvm)->GetEnv(jvm, (void **) (&env), JNI_VERSION_1_6) != JNI_OK) {
+        return jniRet;
+    }
+
+    (*env)->GetJavaVM(env, &globalVm);
+
+    jint regRet = JNI_ERR;
+    regRet =
+            RegisterNativeMethods(env, NATIVE_FFMPEG_CLASS_NAME, ffmpegMethods,
+                                  sizeof(ffmpegMethods) / sizeof(ffmpegMethods[0]));
+    if (regRet != JNI_TRUE) {
+        return JNI_ERR;
+    }
+
+    jclass localStringClass = (*env)->FindClass(env, stringClassName);
+    if (localStringClass == NULL) {
+        LOGE("OnLoad failed to FindClass %s.\n", stringClassName);
+        return JNI_FALSE;
+    }
+
+    (*env)->GetJavaVM(env, &globalVm);
+
+
+
+
+
+    av_jni_set_java_vm(jvm, NULL);
+
+    callbackDataHead = NULL;
+    callbackDataTail = NULL;
+
+    for(int i = 0; i<SESSION_MAP_SIZE; i++) {
+        atomic_init(&sessionMap[i], 0);
+        atomic_init(&sessionInTransitMessageCountMap[i], 0);
+    }
+
+    mutexInit();
+    monitorInit();
+
+    redirectionEnabled = 0;
+
+    //av_set_saf_open(saf_open);
+    //av_set_saf_close(saf_close);
+    return JNI_VERSION_1_6;
+}
+
+void JNI_OnUnload(JavaVM *jvm, void *p) {
+    JNIEnv *env = NULL;
+    if ((*jvm)->GetEnv(jvm, (void **) (&env), JNI_VERSION_1_6) != JNI_OK) {
+        return;
+    }
+    UnregisterNativeMethods(env, NATIVE_FFMPEG_CLASS_NAME);
 }

@@ -28,6 +28,7 @@
             android:label="OpenGl"
             android:exported="true">
         </activity>
+        <activity android:name=".ui.CpuFeatureActivity" />
     </application>
 
 </manifest>

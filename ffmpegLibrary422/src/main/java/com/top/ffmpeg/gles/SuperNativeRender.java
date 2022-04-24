@@ -10,7 +10,7 @@ package com.top.ffmpeg.gles;
 public class SuperNativeRender {
 
     static {
-        System.loadLibrary("SuperNativeRender");
+        System.loadLibrary("OpenGL");
     }
 
     public native void native_OnInit();

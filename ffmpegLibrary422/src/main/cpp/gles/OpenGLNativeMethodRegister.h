@@ -8,7 +8,7 @@
 
 
 #include <jni.h>
-#include "gles/SuperGLRenderContext.h"
+#include "SuperGLRenderContext.h"
 
 
 #define NATIVE_OPENGL_CLASS_NAME "com/top/ffmpeg/gles/SuperNativeRender"

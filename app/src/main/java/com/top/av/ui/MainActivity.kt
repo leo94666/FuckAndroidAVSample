@@ -27,6 +27,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     private fun initLisener() {
 
+        btn_cpu_info.setOnClickListener {
+            CpuFeatureActivity.start(this)
+        }
 
         btn_ffmpeg_info.setOnClickListener {
 

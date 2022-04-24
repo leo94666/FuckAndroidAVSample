@@ -5,28 +5,45 @@ project("ffmpegLibrary422")
 include_directories(abii)
 include_directories(logger)
 include_directories(include)
-include_directories(ffmpeg2)
+include_directories(cpu)
+include_directories(ffmpeg)
 
-include(AndroidNdkModules)
-android_ndk_import_module_cpufeatures()
-set(CPUFEATURES_LIBRARIES cpufeatures)
+#include(AndroidNdkModules)
+#android_ndk_import_module_cpufeatures()
+#set(CPUFEATURES_LIBRARIES cpufeatures)
 
 # 查找日志库
 find_library(
         log-lib
         log)
 
+add_library(cpu_features
+        STATIC
+        IMPORTED)
+
+set_target_properties(cpu_features
+        PROPERTIES IMPORTED_LOCATION
+        ../../../../libs/${ANDROID_ABI}/libcpu_features.a)
+
+add_library(ndk_compat
+        STATIC
+        IMPORTED)
+
+set_target_properties(ndk_compat
+        PROPERTIES IMPORTED_LOCATION
+        ../../../../libs/${ANDROID_ABI}/libndk_compat.a)
 
 add_library(
         ffmpegkit_abidetect
         SHARED
+        cpu/ffmpegkit_abidetect.cpp
         ${ANDROID_NDK}/sources/android/cpufeatures
-        NativeMethodRegister.cpp
 )
 #
 target_link_libraries(
         ffmpegkit_abidetect
-        cpufeatures
+        cpu_features
+        ndk_compat
         ${log-lib}
 )
 
@@ -39,15 +56,15 @@ set_target_properties(ffmpeg
         ../../../../libs/${ANDROID_ABI}/libffmpeg.so)
 
 # 编译一个ffmpeg-cmd库
-add_library(FFmpegKit   # 库名称
+add_library(ffmpegkit   # 库名称
         SHARED             # 库类型
         #ffmpegkits/FFmpegKits.c
         #ffmpeg/ffmpeg_info.c
         #ffmpegkits/ffmpeg_thread.c
-        ffmpeg2/ffmpegkit.c
+        ffmpeg/ffmpegkit.c
         #ffmpeg2/ffprobekit.c
-        ffmpeg2/ffmpegkit_exception.c
-        ffmpeg2/android_lts_support.c
+        ffmpeg/ffmpegkit_exception.c
+        ffmpeg/android_lts_support.c
         fftools/cmdutils.c
         fftools/ffmpeg.c
         #fftools/ffprobe.c
@@ -57,57 +74,41 @@ add_library(FFmpegKit   # 库名称
         )            # 编译进库的源码
 
 target_link_libraries( # Specifies the target library.
-        FFmpegKit
+        ffmpegkit
         #下面这些是链接的库名称（其实就是so文件去掉前面的lib和后面的.so）
         ffmpegkit_abidetect
         ffmpeg
-        cpufeatures
+        cpu_features
         ${log-lib})
 
 
 #OpenGles
 # 如果当前系统版本过低设置拒绝编译
-#if (${ANDROID_PLATFORM_LEVEL} LESS 11)
-#    message(FATAL_ERROR "OPENGL ES2 is not support before API level 11")
-#    return()
-#elseif (${ANDROID_PLATFORM_LEVEL} LESS 18)
-#    add_definitions("-DDYNAMIC_ES3")
-#    set(OPENGL_LIB GLESv2)
-#else ()
-#    set(OPENGL_LIB GLESv3)
-#endif (${ANDROID_PLATFORM_LEVEL} LESS 11)
-#message($OPENGL_LIB)
+if (${ANDROID_PLATFORM_LEVEL} LESS 11)
+    message(FATAL_ERROR "OPENGL ES2 is not support before API level 11")
+    return()
+elseif (${ANDROID_PLATFORM_LEVEL} LESS 18)
+    add_definitions("-DDYNAMIC_ES3")
+    set(OPENGL_LIB GLESv2)
+else ()
+    set(OPENGL_LIB GLESv3)
+endif (${ANDROID_PLATFORM_LEVEL} LESS 11)
+message($OPENGL_LIB)
+
+add_library(
+        OpenGL
+        SHARED
+        gles/OpenGLNativeMethodRegister.cpp
+        gles/SuperGLRenderContext.cpp
+        gles/TriangleSample.cpp
+        gles/GLUtils.cpp
+)
 #
-#add_library(
-#        OpenGL
-#        SHARED
-#        gles/SuperGLRenderContext.cpp
-#        gles/TriangleSample.cpp
-#        gles/GLUtils.cpp
-#)
-##
-#target_link_libraries(
-#        OpenGL
-#        -landroid
-#        -lEGL
-#        -lGLESv3
-#        ${log-lib}
-#)
+target_link_libraries(
+        OpenGL
+        -landroid
+        -lEGL
+        -lGLESv3
+        ${log-lib}
+)
 
-
-####################
-
-#add_library(
-#        NativeMethodRegister
-#        SHARED
-#        NativeMethodRegister.cpp
-#)
-##
-#target_link_libraries(
-#        NativeMethodRegister
-#        FFmpegKit
-#        ffmpegkit_abidetect
-#        ffmpeg
-#        cpufeatures
-#        ${log-lib}
-#)
