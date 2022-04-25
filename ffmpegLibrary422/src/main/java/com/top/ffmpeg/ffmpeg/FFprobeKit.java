@@ -272,9 +272,7 @@ public class FFprobeKit {
      */
     public static MediaInformationSession getMediaInformation(final String path) {
         final MediaInformationSession session = new MediaInformationSession(defaultGetMediaInformationCommandArguments(path));
-
         FFmpegKitConfig.getMediaInformationExecute(session, AbstractSession.DEFAULT_TIMEOUT_FOR_ASYNCHRONOUS_MESSAGES_IN_TRANSMIT);
-
         return session;
     }
 

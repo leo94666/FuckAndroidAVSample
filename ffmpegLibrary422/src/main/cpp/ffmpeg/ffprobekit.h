@@ -21,14 +21,8 @@
 #define FFPROBE_KIT_H
 
 #include <jni.h>
+#define LIB_NAME "ffmpeg-kit"
 
-/*
- * Class:     com_arthenica_ffmpegkit_FFmpegKitConfig
- * Method:    nativeFFprobeExecute
- * Signature: (J[Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL
-nativeFFprobeExecute(JNIEnv *, jclass, jlong,
-                     jobjectArray);
+JNIEXPORT jint JNICALL nativeFFprobeExecute(JNIEnv *, jclass, jlong, jobjectArray);
 
 #endif /* FFPROBE_KIT_H */

@@ -20,22 +20,21 @@
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <libavutil/log.h>
 
 #include "config.h"
 #include "libavcodec/jni.h"
 #include "libavutil/bprint.h"
-#include "ffmpegkit.h"
+#include "ffprobekit.h"
 
 /** Forward declaration for function defined in fftools_ffprobe.c */
 int ffprobe_execute(int argc, char **argv);
 
+//extern 外部变量声明”，表示该变量是一个已经定义的外部变量
 extern int configuredLogLevel;
 extern __thread volatile long globalSessionId;
-
 extern void addSession(long sessionId);
-
 extern void removeSession(long sessionId);
-
 extern void resetMessagesInTransmit(long sessionId);
 
 /**
@@ -47,10 +46,7 @@ extern void resetMessagesInTransmit(long sessionId);
  * @param stringArray reference to the object holding FFprobe command arguments
  * @return zero on successful execution, non-zero on error
  */
-JNIEXPORT jint JNICALL
-nativeFFprobeExecute(JNIEnv *env, jclass object,
-                                                                  jlong id,
-                                                                  jobjectArray stringArray) {
+JNIEXPORT jint JNICALL nativeFFprobeExecute(JNIEnv *env, jclass object, jlong id, jobjectArray stringArray) {
     jstring *tempArray = NULL;
     int argumentCount = 1;
     char **argv = NULL;
@@ -69,8 +65,8 @@ nativeFFprobeExecute(JNIEnv *env, jclass object,
      *
      * ffprobe <arguments>
      */
-    argv = (char **) av_malloc(sizeof(char *) * (argumentCount));
-    argv[0] = (char *) av_malloc(sizeof(char) * (strlen(LIB_NAME) + 1));
+    argv = (char **)av_malloc(sizeof(char*) * (argumentCount));
+    argv[0] = (char *)av_malloc(sizeof(char) * (strlen(LIB_NAME) + 1));
     strcpy(argv[0], LIB_NAME);
 
     // PREPARE ARRAY ELEMENTS

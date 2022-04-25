@@ -146,7 +146,7 @@ void exit_program(int ret)
     // 退出线程(该函数后面定义) edit by leo
     //ffmpeg_thread_exit(ret);
     longjmp_value = ret;
-    longjmp(ex_buf__, ret);
+    longjmp(ex_buf__, ret);//setjmp()和longjmp() 可以实现非局部控制转移即从一个函数到另外一个函数的跳转。
     //exit(ret);
 }
 
@@ -1199,7 +1199,8 @@ void show_banner(int argc, char **argv, const OptionDef *options)
 
 int show_version(void *optctx, const char *opt, const char *arg)
 {
-    av_log_set_callback(log_callback_help);
+    //removed by leo
+   // av_log_set_callback(log_callback_help);
     print_program_info (SHOW_COPYRIGHT, AV_LOG_INFO);
     print_all_libs_info(SHOW_VERSION, AV_LOG_INFO);
 

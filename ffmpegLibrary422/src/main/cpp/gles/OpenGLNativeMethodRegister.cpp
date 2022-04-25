@@ -3,7 +3,7 @@
 //
 
 #include <jni.h>
-#include "logger.h"
+#include <android_log.h>
 #include "OpenGLNativeMethodRegister.h"
 
 static int

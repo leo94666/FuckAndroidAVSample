@@ -20,20 +20,14 @@
 #define FFTOOLS_FFMPEG_H
 
 #include "config.h"
-
 #include <stdint.h>
 #include <stdio.h>
 #include <signal.h>
-
 #include "cmdutils.h"
-
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"
-
 #include "libavcodec/avcodec.h"
-
 #include "libavfilter/avfilter.h"
-
 #include "libavutil/avutil.h"
 #include "libavutil/dict.h"
 #include "libavutil/eval.h"
@@ -42,7 +36,6 @@
 #include "libavutil/pixfmt.h"
 #include "libavutil/rational.h"
 #include "libavutil/threadmessage.h"
-
 #include "libswresample/swresample.h"
 
 #define VSYNC_AUTO       -1

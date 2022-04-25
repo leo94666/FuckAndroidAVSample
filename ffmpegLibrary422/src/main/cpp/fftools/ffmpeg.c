@@ -108,6 +108,8 @@
 
 #include <time.h>
 #include <pthread.h>
+#include <setjmp.h>
+#include <ffmpegkit_exception.h>
 
 #include "ffmpeg.h"
 #include "cmdutils.h"
@@ -5026,85 +5028,90 @@ __thread OptionDef *ffmpeg_options = NULL;
 
 //modify by leo, main->ffmpeg_excute
 int ffmpeg_execute(int argc, char **argv) {
-    //1.局部变量声明
-    int i, ret;
-    BenchmarkTimeStamps ti;
-    //2.初始化动态加载
-    init_dynload();
-    //3.初始化程序结束所调用的函数指针
-    register_exit(ffmpeg_cleanup);
 
-    if (use_log_report) {
-        av_log_set_callback(ffp_log_callback_report);
-    } else {
-        av_log_set_callback(ffp_log_callback_brief);
-    }
 
-    //4.为标准错误描述符设置缓冲模式：无缓冲：不使用缓冲。每个 I/O 操作都被即时写入。buffer 和 size 参数被忽略。
-    setvbuf(stderr, NULL, _IONBF, 0); /* win32 runtime needs this */
+    int savedCode = setjmp(ex_buf__);
+    if (savedCode == 0) {
 
-    //5.初始化日志等级
-    av_log_set_flags(AV_LOG_SKIP_REPEATED);
-    parse_loglevel(argc, argv, options);
+        ffmpeg_options = options;
 
-    //6.守护进程运行标志处理
-    if (argc > 1 && !strcmp(argv[1], "-d")) {
-        run_as_daemon = 1;
-        av_log_set_callback(log_callback_null);
-        argc--;
-        argv++;
-    }
-//7.初始化
+        ffmpeg_var_cleanup();
+
+        //1.局部变量声明
+        int i, ret;
+        BenchmarkTimeStamps ti;
+//        if (use_log_report) {
+//            av_log_set_callback(ffp_log_callback_report);
+//        } else {
+//            av_log_set_callback(ffp_log_callback_brief);
+//        }
+        //2.初始化动态加载
+        init_dynload();
+        //3.初始化程序结束所调用的函数指针
+        register_exit(ffmpeg_cleanup);
+        //4.为标准错误描述符设置缓冲模式：无缓冲：不使用缓冲。每个 I/O 操作都被即时写入。buffer 和 size 参数被忽略。
+        setvbuf(stderr, NULL, _IONBF, 0); /* win32 runtime needs this */
+        //5.初始化日志等级
+        av_log_set_flags(AV_LOG_SKIP_REPEATED);
+        parse_loglevel(argc, argv, options);
+
+        //6.守护进程运行标志处理
+        if (argc > 1 && !strcmp(argv[1], "-d")) {
+            run_as_daemon = 1;
+            av_log_set_callback(log_callback_null);
+            argc--;
+            argv++;
+        }
+        //7.初始化
 #if CONFIG_AVDEVICE
-    avdevice_register_all();
+        avdevice_register_all();
 #endif
-    avformat_network_init();
+        avformat_network_init();
+        //8.打印相关基础信息
+        show_banner(argc, argv, options);
+        /* parse options and open all input/output files */
+        //9.解析选项并打开输入输出文件
+        ret = ffmpeg_parse_options(argc, argv);
+        if (ret < 0)
+            exit_program(1);
+        if (nb_output_files <= 0 && nb_input_files == 0) {
+            show_usage();
+            av_log(NULL, AV_LOG_WARNING, "Use -h to get full help or, even better, run 'man %s'\n",
+                   program_name);
+            exit_program(1);
+        }
+        /* file converter / grab */
+        if (nb_output_files <= 0) {
+            av_log(NULL, AV_LOG_FATAL, "At least one output file must be specified\n");
+            exit_program(1);
+        }
+        for (i = 0; i < nb_output_files; i++) {
+            if (strcmp(output_files[i]->ctx->oformat->name, "rtp"))
+                want_sdp = 0;
+        }
+        current_time = ti = get_benchmark_time_stamps();
+        if (transcode() < 0)
+            exit_program(1);
+        if (do_benchmark) {
+            int64_t utime, stime, rtime;
+            current_time = get_benchmark_time_stamps();
+            utime = current_time.user_usec - ti.user_usec;
+            stime = current_time.sys_usec - ti.sys_usec;
+            rtime = current_time.real_usec - ti.real_usec;
+            av_log(NULL, AV_LOG_INFO,
+                   "bench: utime=%0.3fs stime=%0.3fs rtime=%0.3fs\n",
+                   utime / 1000000.0, stime / 1000000.0, rtime / 1000000.0);
+        }
+        av_log(NULL, AV_LOG_DEBUG,
+               "%"PRIu64" frames successfully decoded, %"PRIu64" decoding errors\n",
+               decode_error_stat[0], decode_error_stat[1]);
+        if ((decode_error_stat[0] + decode_error_stat[1]) * max_error_rate < decode_error_stat[1])
+            exit_program(69);
 
-    //8.打印相关基础信息
-    show_banner(argc, argv, options);
-
-    /* parse options and open all input/output files */
-    //9.解析选项并打开输入输出文件
-    ret = ffmpeg_parse_options(argc, argv);
-    if (ret < 0)
-        exit_program(1);
-
-    if (nb_output_files <= 0 && nb_input_files == 0) {
-        show_usage();
-        av_log(NULL, AV_LOG_WARNING, "Use -h to get full help or, even better, run 'man %s'\n",
-               program_name);
-        exit_program(1);
+        exit_program(received_nb_signals ? 255 : main_ffmpeg_return_code);
+    } else {
+        main_ffmpeg_return_code = (received_nb_signals || cancelRequested(globalSessionId)) ? 255
+                                                                                            : longjmp_value;
     }
-
-    /* file converter / grab */
-    if (nb_output_files <= 0) {
-        av_log(NULL, AV_LOG_FATAL, "At least one output file must be specified\n");
-        exit_program(1);
-    }
-
-    for (i = 0; i < nb_output_files; i++) {
-        if (strcmp(output_files[i]->ctx->oformat->name, "rtp"))
-            want_sdp = 0;
-    }
-
-    current_time = ti = get_benchmark_time_stamps();
-    if (transcode() < 0)
-        exit_program(1);
-    if (do_benchmark) {
-        int64_t utime, stime, rtime;
-        current_time = get_benchmark_time_stamps();
-        utime = current_time.user_usec - ti.user_usec;
-        stime = current_time.sys_usec - ti.sys_usec;
-        rtime = current_time.real_usec - ti.real_usec;
-        av_log(NULL, AV_LOG_INFO,
-               "bench: utime=%0.3fs stime=%0.3fs rtime=%0.3fs\n",
-               utime / 1000000.0, stime / 1000000.0, rtime / 1000000.0);
-    }
-    av_log(NULL, AV_LOG_DEBUG, "%"PRIu64" frames successfully decoded, %"PRIu64" decoding errors\n",
-           decode_error_stat[0], decode_error_stat[1]);
-    if ((decode_error_stat[0] + decode_error_stat[1]) * max_error_rate < decode_error_stat[1])
-        exit_program(69);
-
-    exit_program(received_nb_signals ? 255 : main_ffmpeg_return_code);
     return main_ffmpeg_return_code;
 }

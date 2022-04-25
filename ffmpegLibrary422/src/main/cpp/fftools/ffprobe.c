@@ -28,6 +28,8 @@
 
 #include <string.h>
 #include <pthread.h>
+#include <setjmp.h>
+#include <ffmpegkit_exception.h>
 
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
@@ -78,8 +80,6 @@ typedef struct InputFile {
     int nb_streams;
 } InputFile;
 
-const char program_name[] = "ffprobe";
-const int program_birth_year = 2007;
 
 static int do_bitexact = 0;
 static int do_count_frames = 0;
@@ -119,6 +119,8 @@ static char *print_format;
 static char *stream_specifier;
 static char *show_data_hash;
 
+
+//end
 typedef struct ReadInterval {
     int id;             ///< identifier
     int64_t start, end; ///< start, end in second/AV_TIME_BASE units
@@ -314,7 +316,15 @@ static struct section sections[] = {
         [SECTION_ID_SUBTITLE] =           {SECTION_ID_SUBTITLE, "subtitle", 0, {-1}},
 };
 
-static const OptionDef *options;
+const char ffprobe_program_name[] = "ffprobe";
+const int ffprobe_program_birth_year = 2007;
+
+//add by leo
+__thread volatile int main_ffprobe_return_code = 0;
+extern __thread volatile int longjmp_value;
+__thread OptionDef *ffprobe_options = NULL;
+//static const OptionDef *options;
+
 
 /* FFprobe context */
 static const char *input_filename;
@@ -3132,7 +3142,7 @@ static int probe_file(WriterContext *wctx, const char *filename) {
 
 static void show_usage(void) {
     av_log(NULL, AV_LOG_INFO, "Simple multimedia streams analyzer\n");
-    av_log(NULL, AV_LOG_INFO, "usage: %s [OPTIONS] [INPUT_FILE]\n", program_name);
+    av_log(NULL, AV_LOG_INFO, "usage: %s [OPTIONS] [INPUT_FILE]\n", ffprobe_program_name);
     av_log(NULL, AV_LOG_INFO, "\n");
 }
 
@@ -3143,7 +3153,7 @@ static void ffprobe_show_program_version(WriterContext *w) {
     writer_print_section_header(w, SECTION_ID_PROGRAM_VERSION);
     print_str("version", FFMPEG_VERSION);
     print_fmt("copyright", "Copyright (c) %d-%d the FFmpeg developers",
-              program_birth_year, CONFIG_THIS_YEAR);
+              ffprobe_program_birth_year, CONFIG_THIS_YEAR);
     print_str("compiler_ident", CC_IDENT);
     print_str("configuration", FFMPEG_CONFIGURATION);
     writer_print_section_footer(w);
@@ -3355,10 +3365,12 @@ static int opt_input_file_i(void *optctx, const char *opt, const char *arg) {
     return 0;
 }
 
-void show_help_default(const char *opt, const char *arg) {
-    av_log_set_callback(log_callback_help);
+//modify by leo
+void show_help_default_ffprobe(const char *opt, const char *arg) {
+    //modify by leo
+    //av_log_set_callback(log_callback_help);
     show_usage();
-    show_help_options(options, "Main options:", 0, 0, 0);
+    show_help_options(ffprobe_options, "Main options:", 0, 0, 0);
     printf("\n");
 
     show_help_children(avformat_get_class(), AV_OPT_FLAG_DECODING_PARAM);
@@ -3645,140 +3657,213 @@ static inline int check_section_show_entries(int section_id) {
             do_show_##varname = 1;                                      \
     } while (0)
 
+void ffprobe_var_cleanup() {
+    main_ffprobe_return_code = 0;
+    longjmp_value = 0;
+
+    do_bitexact = 0;
+    do_count_frames = 0;
+    do_count_packets = 0;
+    do_read_frames = 0;
+    do_read_packets = 0;
+    do_show_chapters = 0;
+    do_show_error = 0;
+    do_show_format = 0;
+    do_show_frames = 0;
+    do_show_packets = 0;
+    do_show_programs = 0;
+    do_show_streams = 0;
+    do_show_stream_disposition = 0;
+    do_show_data = 0;
+    do_show_program_version = 0;
+    do_show_library_versions = 0;
+    do_show_pixel_formats = 0;
+    do_show_pixel_format_flags = 0;
+    do_show_pixel_format_components = 0;
+    do_show_log = 0;
+
+    do_show_chapter_tags = 0;
+    do_show_format_tags = 0;
+    do_show_frame_tags = 0;
+    do_show_program_tags = 0;
+    do_show_stream_tags = 0;
+    do_show_packet_tags = 0;
+
+    show_value_unit = 0;
+    use_value_prefix = 0;
+    use_byte_value_binary_prefix = 0;
+    use_value_sexagesimal_format = 0;
+    show_private_data = 1;
+
+    print_format = NULL;
+    stream_specifier = NULL;
+    show_data_hash = NULL;
+
+    read_intervals = NULL;
+    read_intervals_nb = 0;
+    find_stream_info = 1;
+
+    ffprobe_options = NULL;
+
+    input_filename = NULL;
+    iformat = NULL;
+
+    hash = NULL;
+
+    main_ffprobe_return_code = 0;
+
+    nb_streams = 0;
+    nb_streams_packets = NULL;
+    nb_streams_frames = NULL;
+    selected_streams = NULL;
+
+    log_buffer = NULL;
+    log_buffer_size = 0;
+}
+
 int ffprobe_execute(int argc, char **argv) {
+
     const Writer *w;
     WriterContext *wctx;
     char *buf;
     char *w_name = NULL, *w_args = NULL;
     int ret, i;
-
-    init_dynload();
-
+    int savedCode = setjmp(ex_buf__);
+    if (savedCode == 0) {
+        ffprobe_var_cleanup();
+        init_dynload();
 #if HAVE_THREADS
-    ret = pthread_mutex_init(&log_mutex, NULL);
-    if (ret != 0) {
-        goto end;
-    }
-#endif
-    av_log_set_flags(AV_LOG_SKIP_REPEATED);
-    register_exit(ffprobe_cleanup);
-
-    options = real_options;
-    parse_loglevel(argc, argv, options);
-    avformat_network_init();
-    init_opts();
-#if CONFIG_AVDEVICE
-    avdevice_register_all();
-#endif
-
-    show_banner(argc, argv, options);
-    parse_options(NULL, argc, argv, options, opt_input_file);
-
-    if (do_show_log)
-        av_log_set_callback(log_callback);
-
-    /* mark things to show, based on -show_entries */
-    SET_DO_SHOW(CHAPTERS, chapters);
-    SET_DO_SHOW(ERROR, error);
-    SET_DO_SHOW(FORMAT, format);
-    SET_DO_SHOW(FRAMES, frames);
-    SET_DO_SHOW(LIBRARY_VERSIONS, library_versions);
-    SET_DO_SHOW(PACKETS, packets);
-    SET_DO_SHOW(PIXEL_FORMATS, pixel_formats);
-    SET_DO_SHOW(PIXEL_FORMAT_FLAGS, pixel_format_flags);
-    SET_DO_SHOW(PIXEL_FORMAT_COMPONENTS, pixel_format_components);
-    SET_DO_SHOW(PROGRAM_VERSION, program_version);
-    SET_DO_SHOW(PROGRAMS, programs);
-    SET_DO_SHOW(STREAMS, streams);
-    SET_DO_SHOW(STREAM_DISPOSITION, stream_disposition);
-    SET_DO_SHOW(PROGRAM_STREAM_DISPOSITION, stream_disposition);
-
-    SET_DO_SHOW(CHAPTER_TAGS, chapter_tags);
-    SET_DO_SHOW(FORMAT_TAGS, format_tags);
-    SET_DO_SHOW(FRAME_TAGS, frame_tags);
-    SET_DO_SHOW(PROGRAM_TAGS, program_tags);
-    SET_DO_SHOW(STREAM_TAGS, stream_tags);
-    SET_DO_SHOW(PROGRAM_STREAM_TAGS, stream_tags);
-    SET_DO_SHOW(PACKET_TAGS, packet_tags);
-
-    if (do_bitexact && (do_show_program_version || do_show_library_versions)) {
-        av_log(NULL, AV_LOG_ERROR,
-               "-bitexact and -show_program_version or -show_library_versions "
-               "options are incompatible\n");
-        ret = AVERROR(EINVAL);
-        goto end;
-    }
-
-    writer_register_all();
-
-    if (!print_format)
-        print_format = av_strdup("default");
-    if (!print_format) {
-        ret = AVERROR(ENOMEM);
-        goto end;
-    }
-    w_name = av_strtok(print_format, "=", &buf);
-    if (!w_name) {
-        av_log(NULL, AV_LOG_ERROR,
-               "No name specified for the output format\n");
-        ret = AVERROR(EINVAL);
-        goto end;
-    }
-    w_args = buf;
-
-    if (show_data_hash) {
-        if ((ret = av_hash_alloc(&hash, show_data_hash)) < 0) {
-            if (ret == AVERROR(EINVAL)) {
-                const char *n;
-                av_log(NULL, AV_LOG_ERROR,
-                       "Unknown hash algorithm '%s'\nKnown algorithms:",
-                       show_data_hash);
-                for (i = 0; (n = av_hash_names(i)); i++)
-                    av_log(NULL, AV_LOG_ERROR, " %s", n);
-                av_log(NULL, AV_LOG_ERROR, "\n");
-            }
+        ret = pthread_mutex_init(&log_mutex, NULL);
+        if (ret != 0) {
             goto end;
         }
-    }
+#endif
+        av_log_set_flags(AV_LOG_SKIP_REPEATED);
+        register_exit(ffprobe_cleanup);
 
-    w = writer_get_by_name(w_name);
-    if (!w) {
-        av_log(NULL, AV_LOG_ERROR, "Unknown output format with name '%s'\n", w_name);
-        ret = AVERROR(EINVAL);
-        goto end;
-    }
+        ffprobe_options = real_options;
+        parse_loglevel(argc, argv, ffprobe_options);
+        avformat_network_init();
+        init_opts();
+#if CONFIG_AVDEVICE
+        avdevice_register_all();
+#endif
 
-    if ((ret = writer_open(&wctx, w, w_args,
-                           sections, FF_ARRAY_ELEMS(sections))) >= 0) {
-        if (w == &xml_writer)
-            wctx->string_validation_utf8_flags |= AV_UTF8_FLAG_EXCLUDE_XML_INVALID_CONTROL_CODES;
+        show_banner(argc, argv, ffprobe_options);
+        parse_options(NULL, argc, argv, ffprobe_options, opt_input_file);
 
-        writer_print_section_header(wctx, SECTION_ID_ROOT);
+        if (do_show_log)
+            av_log_set_callback(log_callback);
 
-        if (do_show_program_version)
-            ffprobe_show_program_version(wctx);
-        if (do_show_library_versions)
-            ffprobe_show_library_versions(wctx);
-        if (do_show_pixel_formats)
-            ffprobe_show_pixel_formats(wctx);
+        /* mark things to show, based on -show_entries */
+        SET_DO_SHOW(CHAPTERS, chapters);
+        SET_DO_SHOW(ERROR, error);
+        SET_DO_SHOW(FORMAT, format);
+        SET_DO_SHOW(FRAMES, frames);
+        SET_DO_SHOW(LIBRARY_VERSIONS, library_versions);
+        SET_DO_SHOW(PACKETS, packets);
+        SET_DO_SHOW(PIXEL_FORMATS, pixel_formats);
+        SET_DO_SHOW(PIXEL_FORMAT_FLAGS, pixel_format_flags);
+        SET_DO_SHOW(PIXEL_FORMAT_COMPONENTS, pixel_format_components);
+        SET_DO_SHOW(PROGRAM_VERSION, program_version);
+        SET_DO_SHOW(PROGRAMS, programs);
+        SET_DO_SHOW(STREAMS, streams);
+        SET_DO_SHOW(STREAM_DISPOSITION, stream_disposition);
+        SET_DO_SHOW(PROGRAM_STREAM_DISPOSITION, stream_disposition);
 
-        if (!input_filename &&
-            ((do_show_format || do_show_programs || do_show_streams || do_show_chapters ||
-              do_show_packets || do_show_error) ||
-             (!do_show_program_version && !do_show_library_versions && !do_show_pixel_formats))) {
-            show_usage();
-            av_log(NULL, AV_LOG_ERROR, "You have to specify one input file.\n");
-            av_log(NULL, AV_LOG_ERROR, "Use -h to get full help or, even better, run 'man %s'.\n",
-                   program_name);
+        SET_DO_SHOW(CHAPTER_TAGS, chapter_tags);
+        SET_DO_SHOW(FORMAT_TAGS, format_tags);
+        SET_DO_SHOW(FRAME_TAGS, frame_tags);
+        SET_DO_SHOW(PROGRAM_TAGS, program_tags);
+        SET_DO_SHOW(STREAM_TAGS, stream_tags);
+        SET_DO_SHOW(PROGRAM_STREAM_TAGS, stream_tags);
+        SET_DO_SHOW(PACKET_TAGS, packet_tags);
+
+        if (do_bitexact && (do_show_program_version || do_show_library_versions)) {
+            av_log(NULL, AV_LOG_ERROR,
+                   "-bitexact and -show_program_version or -show_library_versions "
+                   "options are incompatible\n");
             ret = AVERROR(EINVAL);
-        } else if (input_filename) {
-            ret = probe_file(wctx, input_filename);
-            if (ret < 0 && do_show_error)
-                show_error(wctx, ret);
+            goto end;
         }
 
-        writer_print_section_footer(wctx);
-        writer_close(&wctx);
+        writer_register_all();
+
+        if (!print_format)
+            print_format = av_strdup("default");
+        if (!print_format) {
+            ret = AVERROR(ENOMEM);
+            goto end;
+        }
+        w_name = av_strtok(print_format, "=", &buf);
+        if (!w_name) {
+            av_log(NULL, AV_LOG_ERROR,
+                   "No name specified for the output format\n");
+            ret = AVERROR(EINVAL);
+            goto end;
+        }
+        w_args = buf;
+
+        if (show_data_hash) {
+            if ((ret = av_hash_alloc(&hash, show_data_hash)) < 0) {
+                if (ret == AVERROR(EINVAL)) {
+                    const char *n;
+                    av_log(NULL, AV_LOG_ERROR,
+                           "Unknown hash algorithm '%s'\nKnown algorithms:",
+                           show_data_hash);
+                    for (i = 0; (n = av_hash_names(i)); i++)
+                        av_log(NULL, AV_LOG_ERROR, " %s", n);
+                    av_log(NULL, AV_LOG_ERROR, "\n");
+                }
+                goto end;
+            }
+        }
+
+        w = writer_get_by_name(w_name);
+        if (!w) {
+            av_log(NULL, AV_LOG_ERROR, "Unknown output format with name '%s'\n", w_name);
+            ret = AVERROR(EINVAL);
+            goto end;
+        }
+
+        if ((ret = writer_open(&wctx, w, w_args,
+                               sections, FF_ARRAY_ELEMS(sections))) >= 0) {
+            if (w == &xml_writer)
+                wctx->string_validation_utf8_flags |= AV_UTF8_FLAG_EXCLUDE_XML_INVALID_CONTROL_CODES;
+
+            writer_print_section_header(wctx, SECTION_ID_ROOT);
+
+            if (do_show_program_version)
+                ffprobe_show_program_version(wctx);
+            if (do_show_library_versions)
+                ffprobe_show_library_versions(wctx);
+            if (do_show_pixel_formats)
+                ffprobe_show_pixel_formats(wctx);
+
+            if (!input_filename &&
+                ((do_show_format || do_show_programs || do_show_streams || do_show_chapters ||
+                  do_show_packets || do_show_error) ||
+                 (!do_show_program_version && !do_show_library_versions &&
+                  !do_show_pixel_formats))) {
+                show_usage();
+                av_log(NULL, AV_LOG_ERROR, "You have to specify one input file.\n");
+                av_log(NULL, AV_LOG_ERROR,
+                       "Use -h to get full help or, even better, run 'man %s'.\n",
+                       ffprobe_program_name);
+                ret = AVERROR(EINVAL);
+            } else if (input_filename) {
+                ret = probe_file(wctx, input_filename);
+                if (ret < 0 && do_show_error)
+                    show_error(wctx, ret);
+            }
+
+            writer_print_section_footer(wctx);
+            writer_close(&wctx);
+        }
+        main_ffprobe_return_code = ret < 0;
+
+    } else {
+        main_ffprobe_return_code = longjmp_value;
     }
 
     end:
@@ -3792,5 +3877,5 @@ int ffprobe_execute(int argc, char **argv) {
 
     avformat_network_deinit();
 
-    return ret < 0;
+    return main_ffprobe_return_code;
 }

@@ -97,7 +97,7 @@ public class FFmpegKitConfig {
     /**
      * The tag used for logging.
      */
-    static final String TAG = "ffmpeg-kit";
+    static final String TAG = "ffmpegLibrary422";
 
     /**
      * Prefix of named pipes created by ffmpeg kit.
@@ -656,6 +656,7 @@ public class FFmpegKitConfig {
         ffmpegSession.startRunning();
 
         try {
+            android.util.Log.w(FFmpegKitConfig.TAG, String.format("FFmpeg execute commond: %s", FFmpegKitConfig.argumentsToString(ffmpegSession.getArguments())));
             final int returnCode = nativeFFmpegExecute(ffmpegSession.getSessionId(), ffmpegSession.getArguments());
             ffmpegSession.complete(new ReturnCode(returnCode));
         } catch (final Exception e) {
@@ -673,6 +674,7 @@ public class FFmpegKitConfig {
         ffprobeSession.startRunning();
 
         try {
+            android.util.Log.w(FFmpegKitConfig.TAG, String.format("FFprobe execute commond: %s", FFmpegKitConfig.argumentsToString(ffprobeSession.getArguments())));
             final int returnCode = nativeFFprobeExecute(ffprobeSession.getSessionId(), ffprobeSession.getArguments());
             ffprobeSession.complete(new ReturnCode(returnCode));
         } catch (final Exception e) {
@@ -694,10 +696,10 @@ public class FFmpegKitConfig {
             final int returnCodeValue = nativeFFprobeExecute(mediaInformationSession.getSessionId(), mediaInformationSession.getArguments());
             final ReturnCode returnCode = new ReturnCode(returnCodeValue);
             mediaInformationSession.complete(returnCode);
-            if (returnCode.isValueSuccess()) {
-                MediaInformation mediaInformation = MediaInformationJsonParser.fromWithError(mediaInformationSession.getAllLogsAsString(waitTimeout));
-                mediaInformationSession.setMediaInformation(mediaInformation);
-            }
+//            if (returnCode.isValueSuccess()) {
+//                MediaInformation mediaInformation = MediaInformationJsonParser.fromWithError(mediaInformationSession.getAllLogsAsString(waitTimeout));
+//                mediaInformationSession.setMediaInformation(mediaInformation);
+//            }
         } catch (final Exception e) {
             mediaInformationSession.fail(e);
             android.util.Log.w(FFmpegKitConfig.TAG, String.format("Get media information execute failed: %s.%s", FFmpegKitConfig.argumentsToString(mediaInformationSession.getArguments()), ThrowableUtils.getStackTraceString(e)));

@@ -2,7 +2,7 @@
 // Created by liyang on 2022/4/6.
 //
 
-#include <logger.h>
+#include <android_log.h>
 #include "GLUtils.h"
 
 GLuint GLUtils::LoadShader(GLenum shaderType, const char *pSource) {

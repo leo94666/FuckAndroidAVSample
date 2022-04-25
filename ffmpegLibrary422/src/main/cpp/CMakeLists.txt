@@ -3,7 +3,7 @@ project("ffmpegLibrary422")
 
 
 include_directories(abii)
-include_directories(logger)
+include_directories(log)
 include_directories(include)
 include_directories(cpu)
 include_directories(ffmpeg)
@@ -58,28 +58,26 @@ set_target_properties(ffmpeg
 # 编译一个ffmpeg-cmd库
 add_library(ffmpegkit   # 库名称
         SHARED             # 库类型
-        #ffmpegkits/FFmpegKits.c
-        #ffmpeg/ffmpeg_info.c
-        #ffmpegkits/ffmpeg_thread.c
         ffmpeg/ffmpegkit.c
-        #ffmpeg2/ffprobekit.c
+        ffmpeg/ffprobekit.c
         ffmpeg/ffmpegkit_exception.c
-        ffmpeg/android_lts_support.c
         fftools/cmdutils.c
         fftools/ffmpeg.c
-        #fftools/ffprobe.c
-        fftools/ffmpeg_filter.c
+        fftools/ffprobe.c
         fftools/ffmpeg_opt.c
         fftools/ffmpeg_hw.c
+        fftools/ffmpeg_filter.c
+        #ffmpeg/android_lts_support.c
         )            # 编译进库的源码
 
-target_link_libraries( # Specifies the target library.
-        ffmpegkit
+target_link_libraries(ffmpegkit
         #下面这些是链接的库名称（其实就是so文件去掉前面的lib和后面的.so）
         ffmpegkit_abidetect
         ffmpeg
         cpu_features
         ${log-lib})
+
+
 
 
 #OpenGles

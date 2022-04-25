@@ -17,8 +17,8 @@
  * along with FFmpegKit.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <android_log.h>
 #include "ffmpegkit_abidetect.h"
-#include <logger.h>
 
 static int RegisterNativeMethods(JNIEnv *env, const char *className,
                                  JNINativeMethod *methods, int methodNum) {
