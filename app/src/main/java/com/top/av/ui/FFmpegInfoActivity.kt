@@ -40,13 +40,14 @@ public class FFmpegInfoActivity : BaseActivity<ActivityFfmpegInfoBinding>() {
     }
 
     fun Run(view: android.view.View) {
-        //val execute = FFmpegKit.execute(mDataBinding.etCmd.text.toString())
+        val execute = FFmpegKit.execute(mDataBinding.etCmd.text.toString())
+        mDataBinding.tvResult.text = execute.toString()
 
 //        val execute = FFprobeKit.execute("/sdcard/1.mp4")
 //        mDataBinding.tvResult.text = execute.toString()
 
-        val mediaInformation = FFprobeKit.getMediaInformation("/sdcard/1.mp4")
-        mDataBinding.tvResult.text = mediaInformation.toString()
+//        val mediaInformation = FFprobeKit.getMediaInformation("/sdcard/1.mp4")
+//        mDataBinding.tvResult.text = mediaInformation.toString()
     }
 
     fun urlProtocol(view: android.view.View) {
