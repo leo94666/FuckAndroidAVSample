@@ -32,7 +32,7 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
     val SAMPLE_TITLES = mutableListOf(
         FFmpegCommand("剪裁", ""),
         FFmpegCommand("图片水印", ""),
-        FFmpegCommand("文字水印", "-i %d$1 -vf \"drawtext=fontfile=/sdcard/simsun.ttc:text='复仇者联盟：终局之战':fontsize=24:fontcolor=red:x=20:y=20:shadowy=2:\" -vcodec libx264 /sdcard/22.mp4 -y"),
+        FFmpegCommand("文字水印", "-i /sdcard/1.mp4 -vf \"drawtext=fontfile=/sdcard/simsun.ttc:text='I Love You, 复仇者联盟：终局之战':fontsize=24:fontcolor=red:x=20:y=20:shadowy=2:\" -vcodec libx264 /sdcard/22.mp4 -y"),
         FFmpegCommand("图片+文字水印", ""),
         FFmpegCommand("转GIF", ""),
         FFmpegCommand("音频提取", ""),
