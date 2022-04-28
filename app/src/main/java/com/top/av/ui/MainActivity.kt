@@ -32,8 +32,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
 
         btn_ffmpeg_info.setOnClickListener {
-
-
             FFmpegInfoActivity.start(MainActivity@ this)
         }
 
@@ -42,38 +40,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
 
         btn_video_editor.setOnClickListener {
+            VideoEditorActivity.start(this)
+        }
 
-            SuperPermission.init(this).permissions(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ).request { allGranted, grantedList, deniedList ->
-                if (allGranted){
-//                   var cmd =FFmpegNative.parseArguments("ffmpeg  -i /sdcard/1.mp4 -vf  \"[in]drawtext=fontfile=/sdcard/MesloLGSNFRegular.ttf:text='%{localtime\\:%T}':x=0:y=0:fontsize=20:fontcolor=yellow:shadowy=2[text];movie=/sdcard/logo.png[wm];[text][wm]overlay=main_w-overlay_w-10:main_h-overlay_h-10[out]\"  -c:v libx264 -an -f mp4 /sdcard/output.mp4 -y")
-//                   // cmd=FFmpegNative.parseArguments("ffprobe")
-//
-//                    FFmpegKits.exec(
-//                        cmd,
-//                        2000,
-//                        object : FFmpegKits.OnCmdExecListener {
-//                            override fun onSuccess() {
-//                                //Toast.makeText(this@MainActivity, "onSuccess", Toast.LENGTH_SHORT).show()
-//                                runOnUiThread {
-//                                    Toast.makeText(this@MainActivity, "onSuccess", Toast.LENGTH_SHORT).show()
-//                                }
-//                            }
-//
-//                            override fun onFailure() {
-//                             //   Toast.makeText(this@MainActivity, "onFailure", Toast.LENGTH_SHORT).show()
-//                            }
-//
-//                            override fun onProgress(progress: Float) {
-//
-//                            }
-//                        })
-                }
-            }
-
-
+        btn_video_player.setOnClickListener {
+            VideoPlayerActivity.start(this)
         }
     }
 

@@ -36,6 +36,7 @@ set_target_properties(ndk_compat
 add_library(
         ffmpegkit_abidetect
         SHARED
+        cpu/list_cpu_features.c
         cpu/ffmpegkit_abidetect.cpp
         ${ANDROID_NDK}/sources/android/cpufeatures
 )

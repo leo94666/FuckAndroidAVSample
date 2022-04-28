@@ -23,6 +23,7 @@
 #include <jni.h>
 #include <config.h>
 #include <ndk_compat/cpu-features.h>
+#include "list_cpu_features.h"
 
 /** Represents armeabi-v7a ABI with NEON support. */
 #define ABI_ARMV7A_NEON "armeabi-v7a-neon"
@@ -83,8 +84,9 @@ JNIEXPORT jstring JNICALL getNativeAbi(JNIEnv *env, jobject instance) {
  * @return ABI name of the running cpu as UTF string
  */
 JNIEXPORT jstring JNICALL getNativeCpuAbi(JNIEnv *env, jobject instance) {
-    AndroidCpuFamily family = android_getCpuFamily();
+    cpu_info();
 
+    AndroidCpuFamily family = android_getCpuFamily();
     if (family == ANDROID_CPU_FAMILY_ARM) {
         uint64_t features = android_getCpuFeatures();
         if (features & ANDROID_CPU_ARM_FEATURE_ARMv7) {

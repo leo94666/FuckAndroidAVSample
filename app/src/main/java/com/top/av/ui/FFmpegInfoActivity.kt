@@ -40,6 +40,7 @@ public class FFmpegInfoActivity : BaseActivity<ActivityFfmpegInfoBinding>() {
     }
 
     fun Run(view: android.view.View) {
+        mDataBinding.tvResult.text=""
         val execute = FFmpegKit.execute(mDataBinding.etCmd.text.toString())
         mDataBinding.tvResult.text = execute.toString()
 

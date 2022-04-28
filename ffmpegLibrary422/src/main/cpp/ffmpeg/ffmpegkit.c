@@ -354,7 +354,7 @@ void addSession(long id) {
  */
 struct CallbackData *callbackDataRemove() {
     struct CallbackData *currentData;
-    LOGI("callbackDataRemove");
+    //LOGI("callbackDataRemove");
     mutexLock();
     if (callbackDataHead == NULL) {
         currentData = NULL;
