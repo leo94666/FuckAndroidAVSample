@@ -32,7 +32,10 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
     val SAMPLE_TITLES = mutableListOf(
         FFmpegCommand("剪裁", ""),
         FFmpegCommand("图片水印", ""),
-        FFmpegCommand("文字水印", "-i /sdcard/1.mp4 -vf \"drawtext=fontfile=/sdcard/simsun.ttc:text='I Love You, 复仇者联盟：终局之战':fontsize=24:fontcolor=red:x=20:y=20:shadowy=2:\" -vcodec libx264 /sdcard/22.mp4 -y"),
+        FFmpegCommand(
+            "文字水印",
+            "-i /sdcard/1.mp4 -vf \"drawtext=fontfile=/sdcad/simsun.ttc:text='I Love You, 复仇者联盟：终局之战':fontsize=24:fontcolor=red:x=20:y=20:shadowy=2:\" -vcodec libx264 /data/data/com.top.av/cache/222.mp4 -y"
+        ),
         FFmpegCommand("图片+文字水印", ""),
         FFmpegCommand("转GIF", ""),
         FFmpegCommand("音频提取", ""),
@@ -76,10 +79,10 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
         }
         FFmpegKitConfig.enableLogCallback {
             //Logger.i(it.toString())
-            android.util.Log.i("ffmpegLibrary422--Java",it.message)
+            android.util.Log.i("ffmpegLibrary422--Java", it.message)
         }
         FFmpegKitConfig.enableStatisticsCallback {
-            android.util.Log.i("ffmpegLibrary422--Java",it.toString())
+            android.util.Log.i("ffmpegLibrary422--Java", it.toString())
         }
     }
 
@@ -101,15 +104,22 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (StringUtils.isTrimEmpty(mVideoPath)) {
+            Toast.makeText(this, "请先选择视频", Toast.LENGTH_SHORT).show()
+            return super.onOptionsItemSelected(item)
+        }
         val id = item.itemId
-        if (id == R.id.action_change_sample) {
-            if (StringUtils.isTrimEmpty(mVideoPath)) {
-                Toast.makeText(this, "请先选择视频", Toast.LENGTH_SHORT).show()
-            } else {
-                showFFmpegDialog()
-            }
+        if (id == R.id.action_select) {
+            showFFmpegDialog()
+        }else if (id == R.id.action_info) {
+            showMediaInfo()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showMediaInfo() {
+        val mediaInformation = FFprobeKit.getMediaInformation(mVideoPath)
+       //Toast.makeText(this,mediaInformation.mediaInformation.getStringProperty(MediaInformation.KEY_BIT_RATE),Toast.LENGTH_SHORT).show()
     }
 
     private fun initVideoView(videoPath: String) {
@@ -157,16 +167,15 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
         runOnUiThread {
             showLoading()
         }
-        FFmpegKit.executeAsync(SAMPLE_TITLES[mSampleSelectedIndex].cmd,this,this,this)
+        FFmpegKit.executeAsync(SAMPLE_TITLES[mSampleSelectedIndex].cmd, this, this, this)
     }
 
     override fun apply(session: FFmpegSession?) {
-        Logger.i(session.toString())
+        runOnUiThread {
+            hideLoading()
+            Toast.makeText(this, session?.returnCode.toString(), Toast.LENGTH_SHORT).show()
+        }
 
-        runOnUiThread { hideLoading() }
-
-        //session?.future
-        //Toast.makeText(this, "处理成功", Toast.LENGTH_SHORT).show()
     }
 
     override fun apply(statistics: Statistics?) {

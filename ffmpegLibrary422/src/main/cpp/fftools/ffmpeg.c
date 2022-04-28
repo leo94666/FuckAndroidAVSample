@@ -116,7 +116,6 @@
 
 #include "libavutil/avassert.h"
 
-#include "../ffmpegkits//FFmpegKits.h"
 #include "../log/android_log.h"
 
 const char program_name[] = "ffmpeg";

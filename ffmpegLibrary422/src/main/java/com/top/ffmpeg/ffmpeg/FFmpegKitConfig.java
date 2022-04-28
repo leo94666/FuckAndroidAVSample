@@ -696,10 +696,10 @@ public class FFmpegKitConfig {
             final int returnCodeValue = nativeFFprobeExecute(mediaInformationSession.getSessionId(), mediaInformationSession.getArguments());
             final ReturnCode returnCode = new ReturnCode(returnCodeValue);
             mediaInformationSession.complete(returnCode);
-//            if (returnCode.isValueSuccess()) {
-//                MediaInformation mediaInformation = MediaInformationJsonParser.fromWithError(mediaInformationSession.getAllLogsAsString(waitTimeout));
-//                mediaInformationSession.setMediaInformation(mediaInformation);
-//            }
+            if (returnCode.isValueSuccess()) {
+                MediaInformation mediaInformation = MediaInformationJsonParser.fromWithError(mediaInformationSession.getAllLogsAsString(waitTimeout));
+                mediaInformationSession.setMediaInformation(mediaInformation);
+            }
         } catch (final Exception e) {
             mediaInformationSession.fail(e);
             android.util.Log.w(FFmpegKitConfig.TAG, String.format("Get media information execute failed: %s.%s", FFmpegKitConfig.argumentsToString(mediaInformationSession.getArguments()), ThrowableUtils.getStackTraceString(e)));

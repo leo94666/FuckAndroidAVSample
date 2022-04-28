@@ -3,8 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.byteflow.openglcamera2.MainActivity">
     <item
-        android:id="@+id/action_change_sample"
+        android:id="@+id/action_info"
+        android:icon="@drawable/ic_media_info"
         android:title="Select"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_select"
+        android:title="Select"
+        android:icon="@drawable/ic_selected"
         app:showAsAction="ifRoom" />
 
 </menu>

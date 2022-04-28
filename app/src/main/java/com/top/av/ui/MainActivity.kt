@@ -1,16 +1,10 @@
 package com.top.av.ui
 
-import android.Manifest
 import android.view.View
-import android.widget.Toast
 import com.top.arch.base.BaseActivity
-import com.top.arch.permissions.SuperPermission
-import com.top.arch.permissions.callback.OnRequestCallback
 import com.top.av.R
 import com.top.av.databinding.ActivityMainBinding
-import com.top.ffmpeg.CmdList
-import com.top.ffmpeg.FFmpegKits
-import com.top.ffmpeg.ffmpeg.FFmpegKit
+
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {

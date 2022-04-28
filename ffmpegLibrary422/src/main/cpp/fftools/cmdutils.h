@@ -35,6 +35,11 @@
 #endif
 
 /**
+ * Defines logs printed to stderr by ffmpeg. They are not filtered and always redirected.
+ */
+#define AV_LOG_STDERR    -16
+
+/**
  * program name, defined by the program for show_version().
  */
 extern const char program_name[];

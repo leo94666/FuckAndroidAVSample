@@ -112,9 +112,9 @@ int configuredLogLevel = AV_LOG_INFO;
 
 
 static const char *avutil_log_get_level_str(int level) {
-    LOGI("avutil_log_get_level_str");
-
     switch (level) {
+        case AV_LOG_STDERR:
+            return "stderr";
         case AV_LOG_QUIET:
             return "quiet";
         case AV_LOG_DEBUG:
@@ -262,7 +262,7 @@ void monitorNotify() {
 void logCallbackDataAdd(int level, AVBPrint *data) {
     LOGI("logCallbackDataAdd");
     // CREATE DATA STRUCT FIRST
-    struct CallbackData *newData =(struct CallbackData *) av_malloc(sizeof(struct CallbackData));
+    struct CallbackData *newData = (struct CallbackData *) av_malloc(sizeof(struct CallbackData));
     newData->type = LogType;
     newData->sessionId = globalSessionId;
     newData->logLevel = level;
@@ -441,7 +441,7 @@ void resetMessagesInTransmit(long id) {
  */
 void ffmpegkit_log_callback_function(void *ptr, int level, const char *format,
                                      va_list vargs) {
-    LOGI("ffmpegkit_log_callback_function");
+    //LOGI("ffmpegkit_log_callback_function");
 
     AVBPrint fullLine;
     AVBPrint part[4];
@@ -453,8 +453,8 @@ void ffmpegkit_log_callback_function(void *ptr, int level, const char *format,
     int activeLogLevel = av_log_get_level();
 
     // AV_LOG_STDERR logs are always redirected
-    if ((activeLogLevel == AV_LOG_QUIET) || (level > activeLogLevel)) {
-        return;
+    if ((activeLogLevel == AV_LOG_QUIET && level != AV_LOG_STDERR) || (level > activeLogLevel)) {
+        //return;
     }
 
     av_bprint_init(&fullLine, 0, AV_BPRINT_SIZE_UNLIMITED);
@@ -528,8 +528,10 @@ void *callbackThreadFunction() {
                 // LOG CALLBACK
                 int size = callbackData->logData.len;
                 jbyteArray byteArray = (jbyteArray) (*env)->NewByteArray(env, size);
-                (*env)->SetByteArrayRegion(env, byteArray, 0, size,callbackData->logData.str);
-                (*env)->CallStaticVoidMethod(env, configClass, logMethod,(jlong) callbackData->sessionId,callbackData->logLevel, byteArray);
+                (*env)->SetByteArrayRegion(env, byteArray, 0, size, callbackData->logData.str);
+                (*env)->CallStaticVoidMethod(env, configClass, logMethod,
+                                             (jlong) callbackData->sessionId,
+                                             callbackData->logLevel, byteArray);
                 (*env)->DeleteLocalRef(env, byteArray);
 
                 // CLEAN LOG DATA
@@ -560,7 +562,7 @@ void *callbackThreadFunction() {
     }
 
     (*globalVm)->DetachCurrentThread(globalVm);
-     LOGI("Async callback block stopped.\n");
+    LOGI("Async callback block stopped.\n");
     return NULL;
 }
 
@@ -694,66 +696,67 @@ JNIEXPORT jstring JNICALL getNativeVersion(JNIEnv *env, jclass object) {
  * @param stringArray reference to the object holding FFmpeg command arguments
  * @return zero on successful execution, non-zero on error
  */
-JNIEXPORT jint JNICALL nativeFFmpegExecute(JNIEnv *env, jclass object, jlong id, jobjectArray stringArray) {
+JNIEXPORT jint JNICALL
+nativeFFmpegExecute(JNIEnv *env, jclass object, jlong id, jobjectArray stringArray) {
     LOGI("nativeFFmpegExecute");
 
     jstring *tempArray = NULL;
-  int argumentCount = 1;
-  char **argv = NULL;
+    int argumentCount = 1;
+    char **argv = NULL;
 
-  // SETS DEFAULT LOG LEVEL BEFORE STARTING A NEW RUN
-  av_log_set_level(configuredLogLevel);
+    // SETS DEFAULT LOG LEVEL BEFORE STARTING A NEW RUN
+    av_log_set_level(configuredLogLevel);
 
-  if (stringArray) {
-    int programArgumentCount = (*env)->GetArrayLength(env, stringArray);
-    argumentCount = programArgumentCount + 1;
+    if (stringArray) {
+        int programArgumentCount = (*env)->GetArrayLength(env, stringArray);
+        argumentCount = programArgumentCount + 1;
 
-    tempArray = (jstring *)av_malloc(sizeof(jstring) * programArgumentCount);
-  }
-
-  /* PRESERVE USAGE FORMAT
-   *
-   * ffmpeg <arguments>
-   */
-  argv = (char **)av_malloc(sizeof(char *) * (argumentCount));
-  argv[0] = (char *)av_malloc(sizeof(char) * (strlen(LIB_NAME) + 1));
-  strcpy(argv[0], LIB_NAME);
-
-  // PREPARE ARRAY ELEMENTS
-  if (stringArray) {
-    for (int i = 0; i < (argumentCount - 1); i++) {
-      tempArray[i] =
-          (jstring)(*env)->GetObjectArrayElement(env, stringArray, i);
-      if (tempArray[i] != NULL) {
-        argv[i + 1] = (char *)(*env)->GetStringUTFChars(env, tempArray[i], 0);
-      }
-    }
-  }
-
-  // REGISTER THE ID BEFORE STARTING THE SESSION
-  globalSessionId = (long)id;
-  addSession((long)id);
-
-  resetMessagesInTransmit(globalSessionId);
-
-  // RUN
-  int returnCode = ffmpeg_execute(argumentCount, argv);
-
-  // ALWAYS REMOVE THE ID FROM THE MAP
-  removeSession((long)id);
-
-  // CLEANUP
-  if (tempArray) {
-    for (int i = 0; i < (argumentCount - 1); i++) {
-      (*env)->ReleaseStringUTFChars(env, tempArray[i], argv[i + 1]);
+        tempArray = (jstring *) av_malloc(sizeof(jstring) * programArgumentCount);
     }
 
-    av_free(tempArray);
-  }
-  av_free(argv[0]);
-  av_free(argv);
+    /* PRESERVE USAGE FORMAT
+     *
+     * ffmpeg <arguments>
+     */
+    argv = (char **) av_malloc(sizeof(char *) * (argumentCount));
+    argv[0] = (char *) av_malloc(sizeof(char) * (strlen(LIB_NAME) + 1));
+    strcpy(argv[0], LIB_NAME);
 
-  return returnCode;
+    // PREPARE ARRAY ELEMENTS
+    if (stringArray) {
+        for (int i = 0; i < (argumentCount - 1); i++) {
+            tempArray[i] =
+                    (jstring) (*env)->GetObjectArrayElement(env, stringArray, i);
+            if (tempArray[i] != NULL) {
+                argv[i + 1] = (char *) (*env)->GetStringUTFChars(env, tempArray[i], 0);
+            }
+        }
+    }
+
+    // REGISTER THE ID BEFORE STARTING THE SESSION
+    globalSessionId = (long) id;
+    addSession((long) id);
+
+    resetMessagesInTransmit(globalSessionId);
+
+    // RUN
+    int returnCode = ffmpeg_execute(argumentCount, argv);
+
+    // ALWAYS REMOVE THE ID FROM THE MAP
+    removeSession((long) id);
+
+    // CLEANUP
+    if (tempArray) {
+        for (int i = 0; i < (argumentCount - 1); i++) {
+            (*env)->ReleaseStringUTFChars(env, tempArray[i], argv[i + 1]);
+        }
+
+        av_free(tempArray);
+    }
+    av_free(argv[0]);
+    av_free(argv);
+
+    return returnCode;
 }
 
 
@@ -889,7 +892,8 @@ jint JNI_OnLoad(JavaVM *jvm, void *p) {
         LOGE("OnLoad failed to FindClass %s.\n", configClassName);
         return JNI_FALSE;
     }
-    if ((*env)->RegisterNatives(env, localConfigClass, ffmpegMethods, sizeof(ffmpegMethods) / sizeof(ffmpegMethods[0])) < 0) {
+    if ((*env)->RegisterNatives(env, localConfigClass, ffmpegMethods,
+                                sizeof(ffmpegMethods) / sizeof(ffmpegMethods[0])) < 0) {
         LOGE("OnLoad failed to RegisterNatives for class %s.\n", configClassName);
         return JNI_FALSE;
     }
@@ -907,7 +911,8 @@ jint JNI_OnLoad(JavaVM *jvm, void *p) {
         LOGE("OnLoad thread failed to GetStaticMethodID for %s.\n", "log");
         return JNI_FALSE;
     }
-    statisticsMethod = (*env)->GetStaticMethodID(env, localConfigClass, "statistics", "(JIFFJIDD)V");
+    statisticsMethod = (*env)->GetStaticMethodID(env, localConfigClass, "statistics",
+                                                 "(JIFFJIDD)V");
     if (statisticsMethod == NULL) {
         LOGE("OnLoad thread failed to GetStaticMethodID for %s.\n", "statistics");
         return JNI_FALSE;
@@ -922,7 +927,8 @@ jint JNI_OnLoad(JavaVM *jvm, void *p) {
         LOGE("OnLoad thread failed to GetStaticMethodID for %s.\n", "safClose");
         return JNI_FALSE;
     }
-    stringConstructor = (*env)->GetMethodID(env, localStringClass, "<init>", "([BLjava/lang/String;)V");
+    stringConstructor = (*env)->GetMethodID(env, localStringClass, "<init>",
+                                            "([BLjava/lang/String;)V");
     if (stringConstructor == NULL) {
         LOGE("OnLoad thread failed to GetMethodID for %s.\n", "<init>");
         return JNI_FALSE;
@@ -936,7 +942,7 @@ jint JNI_OnLoad(JavaVM *jvm, void *p) {
     callbackDataHead = NULL;
     callbackDataTail = NULL;
 
-    for(int i = 0; i<SESSION_MAP_SIZE; i++) {
+    for (int i = 0; i < SESSION_MAP_SIZE; i++) {
         atomic_init(&sessionMap[i], 0);
         atomic_init(&sessionInTransitMessageCountMap[i], 0);
     }

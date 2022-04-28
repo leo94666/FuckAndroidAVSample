@@ -9,7 +9,6 @@ import com.top.arch.base.BaseActivity
 import com.top.arch.logger.Logger
 import com.top.av.R
 import com.top.av.databinding.ActivityFfmpegInfoBinding
-import com.top.ffmpeg.FFmpegKits
 import com.top.ffmpeg.ffmpeg.*
 import kotlinx.android.synthetic.main.activity_ffmpeg_info.*
 
@@ -52,19 +51,19 @@ public class FFmpegInfoActivity : BaseActivity<ActivityFfmpegInfoBinding>() {
     }
 
     fun urlProtocol(view: android.view.View) {
-        tv_result.text = FFmpegKits.urlProtocolInfo()
+
     }
 
     fun avFormat(view: android.view.View) {
-        tv_result.text = FFmpegKits.avFormatInfo()
+
     }
 
     fun avCodec(view: android.view.View) {
-        tv_result.text = FFmpegKits.avCodecInfo()
+
     }
 
     fun avFilter(view: android.view.View) {
-        tv_result.text = FFmpegKits.avFilterInfo()
+
     }
 
     companion object {
