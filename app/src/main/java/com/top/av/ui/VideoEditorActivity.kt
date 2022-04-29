@@ -1,26 +1,25 @@
 package com.top.av.ui
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.util.Log
-import android.view.*
+import android.view.Gravity
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.widget.MediaController
+import android.widget.RadioButton
 import android.widget.Toast
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.top.androidx.dialog.OnDialogClickListener
-import com.top.androidx.dialog.ShowDirection
 import com.top.androidx.dialog.SuperDialog
+import com.top.androidx.recyclerview.SimpleAdapter3
 import com.top.arch.base.BaseActivity
 import com.top.arch.logger.Logger
 import com.top.arch.utils.BitmapUtils
 import com.top.arch.utils.FileUtils
 import com.top.arch.utils.StringUtils
 import com.top.av.R
-import com.top.av.adapter.FFmpegRecyclerViewAdapter
 import com.top.av.bean.FFmpegCommand
 import com.top.av.databinding.ActivityVideoEditorBinding
 import com.top.ffmpeg.ffmpeg.*
@@ -28,8 +27,6 @@ import com.top.media.picker.MediaPicker
 import com.top.media.picker.entity.MediaEntity
 import com.top.media.picker.entity.MediaPickConstants
 import java.io.File
-import java.lang.StringBuilder
-import java.util.ArrayList
 
 public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
     FFmpegSessionCompleteCallback, StatisticsCallback, LogCallback {
@@ -59,7 +56,6 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
 //        FFmpegCommand("滤镜", ""),
 //        FFmpegCommand("分屏", "")
 //    )
-    private var mSampleSelectedIndex: Int = -1
 
     private var mVideoPath: String? = null
 
@@ -171,7 +167,11 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
     private fun buildMediaInfo(): CharSequence? {
         val sb = StringBuilder()
         val mediaInformation = FFprobeKit.getMediaInformation(mVideoPath)
-        sb.append(StreamInformation.KEY_NB_FRAMES+": "+mediaInformation.mediaInformation.streams[0].getStringProperty(StreamInformation.KEY_NB_FRAMES))
+        sb.append(
+            StreamInformation.KEY_NB_FRAMES + ": " + mediaInformation.mediaInformation.streams[0].getStringProperty(
+                StreamInformation.KEY_NB_FRAMES
+            )
+        )
 
         return sb.toString()
     }
@@ -186,9 +186,27 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
     }
 
     private fun showFFmpegDialog() {
+        val mSelectIndex = 0
 
-        val build = SuperDialog.CommonBuilder(this)
-            .setContentView(R.layout.dialog_sample_selected_layout)
+        val build = SuperDialog.RecyclerViewBuilder(this)
+            .setLayoutManager(LinearLayoutManager(this))
+            .setAdapter(object : SimpleAdapter3<FFmpegCommand>(R.layout.dialog_sample_item_layout) {
+                override fun onBindDataViewHolder(
+                    holder: BaseViewHolder,
+                    position: Int,
+                    dataBean: FFmpegCommand?
+                ) {
+                    super.onBindDataViewHolder(holder, position, dataBean)
+                    holder.setText(R.id.item_title, dataBean?.title)
+                    val mRadioButton = holder.findViewById<RadioButton>(R.id.radio_btn)
+                    mRadioButton.isChecked = position == mSelectIndex
+
+                    holder.itemView.setOnClickListener {
+                        dealVideo(SAMPLE_TITLES[position])
+                    }
+                }
+            })
+            .setData(SAMPLE_TITLES as List<Any>?)
             .setCancelable(true)
             .setCanceledOnTouchOutside(true)
             .setGravity(Gravity.CENTER)
@@ -197,40 +215,13 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
             .setHeightRatio(0.6)
             .build()
         build.show()
-
-        val builder = AlertDialog.Builder(this)
-        val inflater = LayoutInflater.from(this)
-        val rootView: View = inflater.inflate(R.layout.dialog_sample_selected_layout, null)
-
-        val dialog = builder.create()
-
-        val resolutionsListView: RecyclerView = rootView.findViewById(R.id.resolution_list_view)
-
-        val myPreviewSizeViewAdapter =
-            FFmpegRecyclerViewAdapter(this, SAMPLE_TITLES)
-        myPreviewSizeViewAdapter.setSelectIndex(mSampleSelectedIndex)
-        myPreviewSizeViewAdapter.addOnItemClickListener { view, position ->
-            myPreviewSizeViewAdapter.selectIndex = position
-            mSampleSelectedIndex = position
-            dialog.cancel()
-            dealVideo()
-        }
-        val manager = LinearLayoutManager(this)
-        manager.orientation = LinearLayoutManager.VERTICAL
-        resolutionsListView.layoutManager = manager
-
-        resolutionsListView.adapter = myPreviewSizeViewAdapter
-        resolutionsListView.scrollToPosition(mSampleSelectedIndex)
-
-        dialog.show()
-        dialog.window!!.setContentView(rootView)
     }
 
-    private fun dealVideo() {
+    private fun dealVideo(ffmpegCommand: FFmpegCommand) {
         runOnUiThread {
             showLoading()
         }
-        FFmpegKit.executeAsync(SAMPLE_TITLES[mSampleSelectedIndex].cmd, this, this, this)
+        FFmpegKit.executeAsync(ffmpegCommand.cmd, this, this, this)
     }
 
     override fun apply(session: FFmpegSession?) {
