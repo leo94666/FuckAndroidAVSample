@@ -29,12 +29,16 @@
             android:screenOrientation="portrait" />
 
         <activity android:name=".ui.OpenGLESActivity"
+            android:screenOrientation="portrait"
             android:label="OpenGLES"
             android:exported="true">
         </activity>
-        <activity android:name=".ui.CpuFeatureActivity" />
-        <activity android:name=".ui.VideoEditorActivity" />
-        <activity android:name=".ui.VideoPlayerActivity" />
+        <activity android:name=".ui.CpuFeatureActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".ui.VideoEditorActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".ui.VideoPlayerActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

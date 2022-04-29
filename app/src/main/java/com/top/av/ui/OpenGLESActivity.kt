@@ -56,8 +56,6 @@ class OpenGLESActivity: BaseActivity<ActivityOpenGlBinding>() {
 
         val dialog = builder.create()
 
-        val confirmBtn = rootView.findViewById<Button>(R.id.confirm_btn)
-        confirmBtn.setOnClickListener { dialog.cancel() }
 
         val resolutionsListView: RecyclerView = rootView.findViewById(R.id.resolution_list_view)
 
@@ -66,7 +64,7 @@ class OpenGLESActivity: BaseActivity<ActivityOpenGlBinding>() {
             OpenGLRecyclerViewAdapter(this, SAMPLE_TITLES)
         myPreviewSizeViewAdapter.setSelectIndex(mSampleSelectedIndex)
         myPreviewSizeViewAdapter.addOnItemClickListener { view, position ->
-
+            dialog.cancel()
         }
         val manager = LinearLayoutManager(this)
         manager.orientation = LinearLayoutManager.VERTICAL

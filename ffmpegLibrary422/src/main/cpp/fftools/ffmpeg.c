@@ -1893,7 +1893,7 @@ static void print_report(int is_last_report, int64_t timer_start, int64_t cur_ti
         av_bprintf(&buf, "%s%02d:%02d:%02d.%02d ",
                    hours_sign, hours, mins, secs, (100 * us) / AV_TIME_BASE);
     }
-
+    ///////////////////////////////////////////////////////////////////onProgressss
     if (bitrate < 0) {
         av_bprintf(&buf, "bitrate=N/A");
         av_bprintf(&buf_script, "bitrate=N/A\n");
@@ -1938,7 +1938,7 @@ static void print_report(int is_last_report, int64_t timer_start, int64_t cur_ti
         fflush(stderr);
     }
     av_bprint_finalize(&buf, NULL);
-
+    //onProgress
     if (progress_avio) {
         av_bprintf(&buf_script, "progress=%s\n",
                    is_last_report ? "end" : "continue");

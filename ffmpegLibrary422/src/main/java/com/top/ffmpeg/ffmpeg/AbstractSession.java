@@ -77,7 +77,7 @@ public abstract class AbstractSession implements Session {
     /**
      * Log entries received for this session.
      */
-    protected final List<Log> logs;
+    protected final List<FFmpegLog> mFFmpegLogs;
 
     /**
      * Log entry lock.
@@ -125,7 +125,7 @@ public abstract class AbstractSession implements Session {
         this.startTime = null;
         this.endTime = null;
         this.arguments = arguments;
-        this.logs = new LinkedList<>();
+        this.mFFmpegLogs = new LinkedList<>();
         this.logsLock = new Object();
         this.future = null;
         this.state = SessionState.CREATED;
@@ -183,7 +183,7 @@ public abstract class AbstractSession implements Session {
     }
 
     @Override
-    public List<Log> getAllLogs(final int waitTimeout) {
+    public List<FFmpegLog> getAllLogs(final int waitTimeout) {
         waitForAsynchronousMessagesInTransmit(waitTimeout);
 
         if (thereAreAsynchronousMessagesInTransmit()) {
@@ -201,14 +201,14 @@ public abstract class AbstractSession implements Session {
      * @return list of log entries generated for this session
      */
     @Override
-    public List<Log> getAllLogs() {
+    public List<FFmpegLog> getAllLogs() {
         return getAllLogs(DEFAULT_TIMEOUT_FOR_ASYNCHRONOUS_MESSAGES_IN_TRANSMIT);
     }
 
     @Override
-    public List<Log> getLogs() {
+    public List<FFmpegLog> getLogs() {
         synchronized (logsLock) {
-            return new LinkedList<>(logs);
+            return new LinkedList<>(mFFmpegLogs);
         }
     }
 
@@ -240,8 +240,8 @@ public abstract class AbstractSession implements Session {
         final StringBuilder concatenatedString = new StringBuilder();
 
         synchronized (logsLock) {
-            for (Log log : logs) {
-                concatenatedString.append(log.getMessage());
+            for (FFmpegLog FFmpegLog : mFFmpegLogs) {
+                concatenatedString.append(FFmpegLog.getMessage());
             }
         }
 
@@ -279,9 +279,9 @@ public abstract class AbstractSession implements Session {
     }
 
     @Override
-    public void addLog(final Log log) {
+    public void addLog(final FFmpegLog FFmpegLog) {
         synchronized (logsLock) {
-            this.logs.add(log);
+            this.mFFmpegLogs.add(FFmpegLog);
         }
     }
 

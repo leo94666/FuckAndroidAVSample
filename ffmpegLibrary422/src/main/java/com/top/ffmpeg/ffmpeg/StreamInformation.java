@@ -46,6 +46,10 @@ public class StreamInformation {
     public static final String KEY_CODEC_TIME_BASE = "codec_time_base";
     public static final String KEY_TAGS = "tags";
 
+    public static final String KEY_NB_FRAMES = "nb_frames";
+
+
+
     /**
      * Stores all properties.
      */

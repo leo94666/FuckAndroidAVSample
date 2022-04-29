@@ -26,11 +26,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
 
         btn_ffmpeg_info.setOnClickListener {
-            FFmpegInfoActivity.start(MainActivity@ this)
+            FFmpegInfoActivity.start(this)
         }
 
         btn_opengl_es.setOnClickListener {
-            OpenGLESActivity.start(MainActivity@ this)
+            OpenGLESActivity.start(this)
         }
 
         btn_video_editor.setOnClickListener {

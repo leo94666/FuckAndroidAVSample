@@ -22,12 +22,12 @@ package com.top.ffmpeg.ffmpeg;
 /**
  * <p>Log entry for an <code>FFmpegKit</code> session.
  */
-public class Log {
+public class FFmpegLog {
     private final long sessionId;
     private final Level level;
     private final String message;
 
-    public Log(final long sessionId, final Level level, final String message) {
+    public FFmpegLog(final long sessionId, final Level level, final String message) {
         this.sessionId = sessionId;
         this.level = level;
         this.message = message;

@@ -92,7 +92,7 @@ public interface Session {
      * @param waitTimeout wait timeout for asynchronous messages in milliseconds
      * @return list of log entries generated for this session
      */
-    List<Log> getAllLogs(final int waitTimeout);
+    List<FFmpegLog> getAllLogs(final int waitTimeout);
 
     /**
      * Returns all log entries generated for this session. If there are asynchronous
@@ -100,7 +100,7 @@ public interface Session {
      *
      * @return list of log entries generated for this session
      */
-    List<Log> getAllLogs();
+    List<FFmpegLog> getAllLogs();
 
     /**
      * Returns all log entries delivered for this session. Note that if there are asynchronous log
@@ -109,7 +109,7 @@ public interface Session {
      *
      * @return list of log entries received for this session
      */
-    List<Log> getLogs();
+    List<FFmpegLog> getLogs();
 
     /**
      * Returns all log entries generated for this session as a concatenated string. If there are
@@ -195,9 +195,9 @@ public interface Session {
      * It is invoked internally by <code>FFmpegKit</code> library methods. Must not be used by user
      * applications.
      *
-     * @param log log entry
+     * @param FFmpegLog log entry
      */
-    void addLog(final Log log);
+    void addLog(final FFmpegLog FFmpegLog);
 
     /**
      * Returns the future created for this session, if it is executed asynchronously.

@@ -219,7 +219,7 @@ public class FFmpegKitConfig {
     private static void log(final long sessionId, final int levelValue, final byte[] logMessage) {
         final Level level = Level.from(levelValue);
         final String text = new String(logMessage);
-        final Log log = new Log(sessionId, level, text);
+        final FFmpegLog FFmpegLog = new FFmpegLog(sessionId, level, text);
         boolean globalCallbackDefined = false;
         boolean sessionCallbackDefined = false;
         LogRedirectionStrategy activeLogRedirectionStrategy = globalLogRedirectionStrategy;
@@ -233,14 +233,14 @@ public class FFmpegKitConfig {
         final Session session = getSession(sessionId);
         if (session != null) {
             activeLogRedirectionStrategy = session.getLogRedirectionStrategy();
-            session.addLog(log);
+            session.addLog(FFmpegLog);
 
             if (session.getLogCallback() != null) {
                 sessionCallbackDefined = true;
 
                 try {
                     // NOTIFY SESSION CALLBACK DEFINED
-                    session.getLogCallback().apply(log);
+                    session.getLogCallback().apply(FFmpegLog);
                 } catch (final Exception e) {
                     android.util.Log.e(FFmpegKitConfig.TAG, String.format("Exception thrown inside session log callback.%s", ThrowableUtils.getStackTraceString(e)));
                 }
@@ -253,7 +253,7 @@ public class FFmpegKitConfig {
 
             try {
                 // NOTIFY GLOBAL CALLBACK DEFINED
-                globalLogCallbackFunction.apply(log);
+                globalLogCallbackFunction.apply(FFmpegLog);
             } catch (final Exception e) {
                 android.util.Log.e(FFmpegKitConfig.TAG, String.format("Exception thrown inside global log callback.%s", ThrowableUtils.getStackTraceString(e)));
             }

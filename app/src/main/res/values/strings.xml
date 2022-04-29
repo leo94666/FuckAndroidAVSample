@@ -5,4 +5,6 @@
     <string name="cpu_abi">cpu abi: %1$s</string>
     <string name="cpu_count">cpu count: %1$d</string>
 
+
+
 </resources>
