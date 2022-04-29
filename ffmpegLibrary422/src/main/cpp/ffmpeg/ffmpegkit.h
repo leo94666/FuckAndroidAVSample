@@ -25,6 +25,7 @@
 #include "libavutil/log.h"
 #include "libavutil/ffversion.h"
 #include "ffprobekit.h"
+#include "stdio.h"
 
 /** Library version string */
 #define FFMPEG_KIT_VERSION "4.5.1"
@@ -35,6 +36,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 JNIEXPORT void JNICALL enableNativeRedirection(JNIEnv *, jclass);
 
 JNIEXPORT void JNICALL disableNativeRedirection(JNIEnv *, jclass);
@@ -52,11 +54,13 @@ JNIEXPORT jint JNICALL nativeFFmpegExecute(JNIEnv *, jclass, jlong, jobjectArray
 
 JNIEXPORT void JNICALL nativeFFmpegCancel(JNIEnv *, jclass, jlong);
 
-JNIEXPORT int JNICALL registerNewNativeFFmpegPipe(JNIEnv *env, jclass object, jstring ffmpegPipePath);
+JNIEXPORT int JNICALL
+registerNewNativeFFmpegPipe(JNIEnv *env, jclass object, jstring ffmpegPipePath);
 
 JNIEXPORT jstring JNICALL getNativeBuildDate(JNIEnv *env, jclass object);
 
-JNIEXPORT int JNICALL setNativeEnvironmentVariable(JNIEnv *env, jclass object, jstring variableName,jstring variableValue);
+JNIEXPORT int JNICALL setNativeEnvironmentVariable(JNIEnv *env, jclass object, jstring variableName,
+                                                   jstring variableValue);
 
 JNIEXPORT void JNICALL ignoreNativeSignal(JNIEnv *env, jclass object, jint signum);
 

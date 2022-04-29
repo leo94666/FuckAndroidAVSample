@@ -288,7 +288,7 @@
  *     }
  *     if (!entry)
  *         break;
- *     printf("%s\n", entry->name);
+ *    av_log(NULL, AV_LOG_STDERR,"%s\n", entry->name);
  *     avio_free_directory_entry(&entry);
  * }
  * @endcode

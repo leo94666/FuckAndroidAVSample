@@ -139,7 +139,7 @@ static const char *avutil_log_get_level_str(int level) {
 static void avutil_log_format_line(void *avcl, int level, const char *fmt,
                                    va_list vl, AVBPrint part[4],
                                    int *print_prefix) {
-    LOGI("avutil_log_format_line");
+   // LOGI("avutil_log_format_line");
 
     int flags = av_log_get_flags();
     AVClass *avc = avcl ? *(AVClass **) avcl : NULL;
@@ -174,7 +174,7 @@ static void avutil_log_format_line(void *avcl, int level, const char *fmt,
 }
 
 static void avutil_log_sanitize(uint8_t *line) {
-    LOGI("avutil_log_sanitize");
+    //LOGI("avutil_log_sanitize");
 
     while (*line) {
         if (*line < 0x08 || (*line > 0x0D && *line < 0x20))
@@ -260,7 +260,7 @@ void monitorNotify() {
  * @param data log data
  */
 void logCallbackDataAdd(int level, AVBPrint *data) {
-    LOGI("logCallbackDataAdd");
+   // LOGI("logCallbackDataAdd");
     // CREATE DATA STRUCT FIRST
     struct CallbackData *newData = (struct CallbackData *) av_malloc(sizeof(struct CallbackData));
     newData->type = LogType;
@@ -296,7 +296,7 @@ void logCallbackDataAdd(int level, AVBPrint *data) {
 void statisticsCallbackDataAdd(int frameNumber, float fps, float quality,
                                int64_t size, int time, double bitrate,
                                double speed) {
-    LOGI("statisticsCallbackDataAdd");
+    //LOGI("statisticsCallbackDataAdd");
 
     // CREATE DATA STRUCT FIRST
     struct CallbackData *newData =
@@ -454,7 +454,7 @@ void ffmpegkit_log_callback_function(void *ptr, int level, const char *format,
 
     // AV_LOG_STDERR logs are always redirected
     if ((activeLogLevel == AV_LOG_QUIET && level != AV_LOG_STDERR) || (level > activeLogLevel)) {
-        //return;
+        return;
     }
 
     av_bprint_init(&fullLine, 0, AV_BPRINT_SIZE_UNLIMITED);

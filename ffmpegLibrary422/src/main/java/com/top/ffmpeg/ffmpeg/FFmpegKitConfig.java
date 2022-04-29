@@ -693,6 +693,7 @@ public class FFmpegKitConfig {
         mediaInformationSession.startRunning();
 
         try {
+            android.util.Log.w(FFmpegKitConfig.TAG, String.format("FFprobe execute commond: %s", FFmpegKitConfig.argumentsToString(mediaInformationSession.getArguments())));
             final int returnCodeValue = nativeFFprobeExecute(mediaInformationSession.getSessionId(), mediaInformationSession.getArguments());
             final ReturnCode returnCode = new ReturnCode(returnCodeValue);
             mediaInformationSession.complete(returnCode);

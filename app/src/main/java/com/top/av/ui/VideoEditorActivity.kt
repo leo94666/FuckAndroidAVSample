@@ -12,6 +12,7 @@ import android.widget.MediaController
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import com.top.arch.base.BaseActivity
 import com.top.arch.logger.Logger
 import com.top.arch.model.MediaType
@@ -34,7 +35,7 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
         FFmpegCommand("图片水印", ""),
         FFmpegCommand(
             "文字水印",
-            "-i /sdcard/1.mp4 -vf \"drawtext=fontfile=/sdcad/simsun.ttc:text='I Love You, 复仇者联盟：终局之战':fontsize=24:fontcolor=red:x=20:y=20:shadowy=2:\" -vcodec libx264 /data/data/com.top.av/cache/222.mp4 -y"
+            "-i /sdcard/1.mp4 -vf \"drawtext=fontfile=/sdcard/simsun.ttc:text='I Love You, 复仇者联盟：终局之战':fontsize=24:fontcolor=red:x=20:y=20:shadowy=2:\" -vcodec libx264 /data/data/com.top.av/cache/222.mp4 -y"
         ),
         FFmpegCommand("图片+文字水印", ""),
         FFmpegCommand("转GIF", ""),
@@ -119,7 +120,8 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
 
     private fun showMediaInfo() {
         val mediaInformation = FFprobeKit.getMediaInformation(mVideoPath)
-       //Toast.makeText(this,mediaInformation.mediaInformation.getStringProperty(MediaInformation.KEY_BIT_RATE),Toast.LENGTH_SHORT).show()
+        Toast.makeText(this,mediaInformation.mediaInformation.getStringProperty(MediaInformation.KEY_MEDIA_PROPERTIES),Toast.LENGTH_SHORT).show()
+        //mDataBinding.tvVideoInfo.text=Gson().toJson(mediaInformation.mediaInformation)
     }
 
     private fun initVideoView(videoPath: String) {
@@ -179,11 +181,11 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
     }
 
     override fun apply(statistics: Statistics?) {
-        Logger.i(statistics.toString())
+        //Logger.i(statistics.toString())
     }
 
     override fun apply(log: Log?) {
-        Logger.i(log.toString())
+        //Logger.i(log.toString())
     }
 
 }

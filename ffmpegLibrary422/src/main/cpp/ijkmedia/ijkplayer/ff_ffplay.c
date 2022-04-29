@@ -96,7 +96,7 @@
 #endif
 
 #if defined(__ANDROID__)
-#define printf(...) ALOGD(__VA_ARGS__)
+#defineav_log(NULL, AV_LOG_STDERR,...) ALOGD(__VA_ARGS__)
 #endif
 
 #define FFP_IO_STAT_STEP (50 * 1024)
@@ -1607,7 +1607,7 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
     }
 
 #if defined(DEBUG_SYNC)
-    printf("frame_type=%c pts=%0.3f\n",
+   av_log(NULL, AV_LOG_STDERR,"frame_type=%c pts=%0.3f\n",
            av_get_picture_type_char(src_frame->pict_type), pts);
 #endif
 
@@ -2612,7 +2612,7 @@ reload:
 #ifdef FFP_SHOW_AUDIO_DELAY
     {
         static double last_clock;
-        printf("audio: delay=%0.3f clock=%0.3f clock0=%0.3f\n",
+       av_log(NULL, AV_LOG_STDERR,"audio: delay=%0.3f clock=%0.3f clock0=%0.3f\n",
                is->audio_clock - last_clock,
                is->audio_clock, audio_clock0);
         last_clock = is->audio_clock;

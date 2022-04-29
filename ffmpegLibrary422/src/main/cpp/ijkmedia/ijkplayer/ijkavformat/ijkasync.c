@@ -679,28 +679,28 @@ int main(void)
      * test normal read
      */
     ret = ffurl_open(&h, "async:async-test:", AVIO_FLAG_READ, NULL, NULL);
-    printf("open: %d\n", ret);
+   av_log(NULL, AV_LOG_STDERR,"open: %d\n", ret);
 
     size = ffurl_size(h);
-    printf("size: %"PRId64"\n", size);
+   av_log(NULL, AV_LOG_STDERR,"size: %"PRId64"\n", size);
 
     pos = ffurl_seek(h, 0, SEEK_CUR);
     read_len = 0;
     while (1) {
         ret = ffurl_read(h, buf, sizeof(buf));
         if (ret == AVERROR_EOF) {
-            printf("read-error: AVERROR_EOF at %"PRId64"\n", ffurl_seek(h, 0, SEEK_CUR));
+           av_log(NULL, AV_LOG_STDERR,"read-error: AVERROR_EOF at %"PRId64"\n", ffurl_seek(h, 0, SEEK_CUR));
             break;
         }
         else if (ret == 0)
             break;
         else if (ret < 0) {
-            printf("read-error: %d at %"PRId64"\n", ret, ffurl_seek(h, 0, SEEK_CUR));
+           av_log(NULL, AV_LOG_STDERR,"read-error: %d at %"PRId64"\n", ret, ffurl_seek(h, 0, SEEK_CUR));
             goto fail;
         } else {
             for (i = 0; i < ret; ++i) {
                 if (buf[i] != (pos & 0xFF)) {
-                    printf("read-mismatch: actual %d, expecting %d, at %"PRId64"\n",
+                   av_log(NULL, AV_LOG_STDERR,"read-mismatch: actual %d, expecting %d, at %"PRId64"\n",
                            (int)buf[i], (int)(pos & 0xFF), pos);
                     break;
                 }
@@ -710,16 +710,16 @@ int main(void)
 
         read_len += ret;
     }
-    printf("read: %"PRId64"\n", read_len);
+   av_log(NULL, AV_LOG_STDERR,"read: %"PRId64"\n", read_len);
 
     /*
      * test normal seek
      */
     ret = ffurl_read(h, buf, 1);
-    printf("read: %d\n", ret);
+   av_log(NULL, AV_LOG_STDERR,"read: %d\n", ret);
 
     pos = ffurl_seek(h, TEST_SEEK_POS, SEEK_SET);
-    printf("seek: %"PRId64"\n", pos);
+   av_log(NULL, AV_LOG_STDERR,"seek: %"PRId64"\n", pos);
 
     read_len = 0;
     while (1) {
@@ -729,12 +729,12 @@ int main(void)
         else if (ret == 0)
             break;
         else if (ret < 0) {
-            printf("read-error: %d at %"PRId64"\n", ret, ffurl_seek(h, 0, SEEK_CUR));
+           av_log(NULL, AV_LOG_STDERR,"read-error: %d at %"PRId64"\n", ret, ffurl_seek(h, 0, SEEK_CUR));
             goto fail;
         } else {
             for (i = 0; i < ret; ++i) {
                 if (buf[i] != (pos & 0xFF)) {
-                    printf("read-mismatch: actual %d, expecting %d, at %"PRId64"\n",
+                   av_log(NULL, AV_LOG_STDERR,"read-mismatch: actual %d, expecting %d, at %"PRId64"\n",
                            (int)buf[i], (int)(pos & 0xFF), pos);
                     break;
                 }
@@ -744,10 +744,10 @@ int main(void)
 
         read_len += ret;
     }
-    printf("read: %"PRId64"\n", read_len);
+   av_log(NULL, AV_LOG_STDERR,"read: %"PRId64"\n", read_len);
 
     ret = ffurl_read(h, buf, 1);
-    printf("read: %d\n", ret);
+   av_log(NULL, AV_LOG_STDERR,"read: %d\n", ret);
 
     /*
      * test read error
@@ -755,10 +755,10 @@ int main(void)
     ffurl_close(h);
     av_dict_set_int(&opts, "async-test-read-error", -10000, 0);
     ret = ffurl_open(&h, "async:async-test:", AVIO_FLAG_READ, NULL, &opts);
-    printf("open: %d\n", ret);
+   av_log(NULL, AV_LOG_STDERR,"open: %d\n", ret);
 
     ret = ffurl_read(h, buf, 1);
-    printf("read: %d\n", ret);
+   av_log(NULL, AV_LOG_STDERR,"read: %d\n", ret);
 
 fail:
     av_dict_free(&opts);

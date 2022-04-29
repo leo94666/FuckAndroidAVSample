@@ -22,6 +22,7 @@ package com.top.ffmpeg.ffmpeg;
 import android.util.Log;
 
 
+import com.top.arch.logger.Logger;
 import com.top.arch.utils.ThrowableUtils;
 
 import org.json.JSONArray;
@@ -63,6 +64,8 @@ public class MediaInformationJsonParser {
      * @throws JSONException if a parsing error occurs
      */
     public static MediaInformation fromWithError(final String ffprobeJsonOutput) throws JSONException {
+        Logger.json(ffprobeJsonOutput);
+
         final JSONObject jsonObject = new JSONObject(ffprobeJsonOutput);
         final JSONArray streamArray = jsonObject.optJSONArray(KEY_STREAMS);
         final JSONArray chapterArray = jsonObject.optJSONArray(KEY_CHAPTERS);
