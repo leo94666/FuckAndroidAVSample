@@ -120,7 +120,7 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
 
     private fun showMediaInfo() {
         val mediaInformation = FFprobeKit.getMediaInformation(mVideoPath)
-        Toast.makeText(this,mediaInformation.mediaInformation.getStringProperty(MediaInformation.KEY_MEDIA_PROPERTIES),Toast.LENGTH_SHORT).show()
+        Toast.makeText(this,""+mediaInformation.mediaInformation.streams[0].getStringProperty(StreamInformation.KEY_CODEC),Toast.LENGTH_SHORT).show()
         //mDataBinding.tvVideoInfo.text=Gson().toJson(mediaInformation.mediaInformation)
     }
 
