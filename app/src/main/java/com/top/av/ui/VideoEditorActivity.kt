@@ -12,6 +12,7 @@ import android.widget.MediaController
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.top.androidx.dialog.OnDialogClickListener
 import com.top.androidx.dialog.SuperDialog
 import com.top.androidx.recyclerview.SimpleAdapter3
 import com.top.arch.base.BaseActivity
@@ -172,7 +173,30 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
                 StreamInformation.KEY_NB_FRAMES
             )
         )
-
+        sb.append("\n")
+        sb.append(
+            StreamInformation.KEY_WIDTH + ": " + mediaInformation.mediaInformation.streams[0].getStringProperty(
+                StreamInformation.KEY_WIDTH
+            )
+        )
+        sb.append("\n")
+        sb.append(
+            StreamInformation.KEY_HEIGHT + ": " + mediaInformation.mediaInformation.streams[0].getStringProperty(
+                StreamInformation.KEY_HEIGHT
+            )
+        )
+        sb.append("\n")
+        sb.append(
+            StreamInformation.KEY_BIT_RATE + ": " + mediaInformation.mediaInformation.streams[0].getStringProperty(
+                StreamInformation.KEY_BIT_RATE
+            )
+        )
+        sb.append("\n")
+        sb.append(
+            StreamInformation.KEY_CODEC + ": " + mediaInformation.mediaInformation.streams[0].getStringProperty(
+                StreamInformation.KEY_CODEC
+            )
+        )
         return sb.toString()
     }
 
@@ -186,7 +210,7 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
     }
 
     private fun showFFmpegDialog() {
-        val mSelectIndex = 0
+        var mSelectIndex = 0
 
         val build = SuperDialog.RecyclerViewBuilder(this)
             .setLayoutManager(LinearLayoutManager(this))
@@ -199,11 +223,23 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
                     super.onBindDataViewHolder(holder, position, dataBean)
                     holder.setText(R.id.item_title, dataBean?.title)
                     val mRadioButton = holder.findViewById<RadioButton>(R.id.radio_btn)
-                    mRadioButton.isChecked = position == mSelectIndex
-
                     holder.itemView.setOnClickListener {
-                        dealVideo(SAMPLE_TITLES[position])
+                        mSelectIndex = position
+                        mRadioButton.isChecked = (position == mSelectIndex)
+
                     }
+                }
+            })
+            .setTitle("FFmpeg")
+            .setPositiveButton("确定", object : OnDialogClickListener {
+                override fun onClick(view: View?): Boolean {
+                    dealVideo(SAMPLE_TITLES[mSelectIndex])
+                    return true
+                }
+            })
+            .setNegativeButton("取消", object : OnDialogClickListener {
+                override fun onClick(view: View?): Boolean {
+                    return true
                 }
             })
             .setData(SAMPLE_TITLES as List<Any>?)
@@ -227,9 +263,9 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
     override fun apply(session: FFmpegSession?) {
         runOnUiThread {
             hideLoading()
-            Toast.makeText(this, session?.returnCode.toString(), Toast.LENGTH_SHORT).show()
             mDataBinding.videoView.pause()
             mDataBinding.videoView.setVideoPath(outputPath)
+            mVideoPath = outputPath
             mDataBinding.videoView.start()
         }
     }

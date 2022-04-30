@@ -54,7 +54,7 @@ dependencies {
     //androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     implementation 'com.gitee.leo94666.an-library:AnArch:0.0.1-beta-2.4'
-    implementation 'com.gitee.leo94666.an-library:Androidx:0.0.1-beta-2.5'
+    implementation 'com.gitee.leo94666.an-library:Androidx:0.0.1-beta-2.7'
     implementation 'com.gitee.leo94666.an-library:MediaPicker:0.0.1-beta-2.4'
 
     //implementation 'com.top.androidx:AnAndroidx:1.0'
