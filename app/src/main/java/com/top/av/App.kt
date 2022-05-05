@@ -4,12 +4,14 @@ import com.top.arch.BuildConfig
 import com.top.arch.base.BaseApplication
 import com.top.arch.logger.*
 import com.top.arch.logger.impl.FormatStrategy
+import com.top.arch.utils.DataCenter
 
 class App: BaseApplication() {
 
     override fun onCreate() {
         super.onCreate()
         initLogger()
+        DataCenter.getInternetVideoPath()
     }
 
     private fun initLogger() {

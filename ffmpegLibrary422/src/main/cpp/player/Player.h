@@ -8,6 +8,7 @@
 
 #include <jni.h>
 #include "MediaPlayer.h"
+#include "libavcodec/jni.h"
 
 class Player {
 public:

@@ -4,7 +4,6 @@
 
 #include "Player.h"
 #include "FFMediaPlayer.h"
-
 void
 Player::Init(JNIEnv *env, jobject obj, char *url, int playerType, int renderType, jobject surface) {
     m_MediaPlayer = new FFMediaPlayer();

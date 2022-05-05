@@ -5,6 +5,7 @@ project("ffmpegLibrary422")
 include_directories(log)
 include_directories(include)
 include_directories(ffmpeg)
+include_directories(utils)
 
 
 # 查找日志库
@@ -12,6 +13,7 @@ find_library(
         log-lib
         log)
 
+add_subdirectory(utils)
 
 add_subdirectory(cpu)
 
