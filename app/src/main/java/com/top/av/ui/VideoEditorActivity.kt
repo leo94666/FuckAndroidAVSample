@@ -226,7 +226,6 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
                     holder.itemView.setOnClickListener {
                         mSelectIndex = position
                         mRadioButton.isChecked = (position == mSelectIndex)
-
                     }
                 }
             })
