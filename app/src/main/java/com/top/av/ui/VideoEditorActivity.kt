@@ -18,6 +18,7 @@ import com.top.androidx.recyclerview.SimpleAdapter3
 import com.top.arch.base.BaseActivity
 import com.top.arch.logger.Logger
 import com.top.arch.utils.BitmapUtils
+import com.top.arch.utils.DataCenter
 import com.top.arch.utils.FileUtils
 import com.top.arch.utils.StringUtils
 import com.top.av.R
@@ -58,6 +59,7 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
 //        FFmpegCommand("分屏", "")
 //    )
 
+    //private var mVideoPath: String? = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"
     private var mVideoPath: String? = null
 
     companion object {
@@ -81,6 +83,7 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
                 .setMediaType(MediaPickConstants.MEDIA_TYPE_VIDEO)
                 .forResult(1000)
         }
+
     }
 
     private var inputPath: String? = null
@@ -96,7 +99,7 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
         SAMPLE_TITLES.add(
             FFmpegCommand(
                 "文字水印",
-                "-i $inputPath -vf \"drawtext=fontfile=/sdcard/simsun.ttc:text='I Love You, 复仇者联盟：终局之战':fontsize=24:fontcolor=red:x=20:y=20:shadowy=2:\" -vcodec libx264 $outputPath -y"
+                "-i $inputPath -vf \"drawtext=fontfile=/sdcard/fonts/MesloLGSNFRegular.ttf:text='I Love You, 复仇者联盟：终局之战':fontsize=24:fontcolor=red:x=20:y=20:shadowy=2:\" -vcodec libx264 $outputPath -y"
             )
         )
 
@@ -115,7 +118,7 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
         SAMPLE_TITLES.add(
             FFmpegCommand(
                 "图片+文字水印",
-                "-i $inputPath -vf \"[in]drawtext=fontfile=/sdcard/simsun.ttc:text='I Love You, 复仇者联盟：终局之战':fontsize=24:fontcolor=red:x=20:y=20:shadowy=2[text];movie=$waterMarkPath[watermark];[text][watermark]overlay=W-w:H-h[out]\" -vcodec libx264 $outputPath -y"
+                "-i $inputPath -vf \"[in]drawtext=fontfile=/sdcard/fonts/MesloLGSNFRegular.ttf:text='I Love You, 复仇者联盟：终局之战':fontsize=24:fontcolor=red:x=20:y=20:shadowy=2[text];movie=$waterMarkPath[watermark];[text][watermark]overlay=W-w:H-h[out]\" -vcodec libx264 $outputPath -y"
             )
         )
     }
@@ -197,6 +200,12 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
                 StreamInformation.KEY_CODEC
             )
         )
+        sb.append("\n")
+        sb.append(
+            MediaInformation.KEY_DURATION + ": " + mediaInformation.mediaInformation.streams[0].getStringProperty(
+                MediaInformation.KEY_DURATION
+            )
+        )
         return sb.toString()
     }
 
@@ -263,7 +272,7 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
         runOnUiThread {
             hideLoading()
             mDataBinding.videoView.pause()
-            mDataBinding.videoView.setVideoPath(outputPath)
+           mDataBinding.videoView.setVideoPath(outputPath)
             mVideoPath = outputPath
             mDataBinding.videoView.start()
         }

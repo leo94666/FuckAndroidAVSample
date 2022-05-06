@@ -5,6 +5,7 @@
 #ifndef AV_VIDEODECODER_H
 #define AV_VIDEODECODER_H
 
+#include "libswscale/swscale.h"
 extern "C" {
 #include <libavutil/imgutils.h>
 };
@@ -54,7 +55,7 @@ private:
     uint8_t *m_FrameBuffer = nullptr;
 
     VideoRender *m_VideoRender = nullptr;
-//    SwsContext *m_SwsContext = nullptr;
+    SwsContext *m_SwsContext = nullptr;
 //    SingleVideoRecorder *m_pVideoRecorder = nullptr;
 };
 

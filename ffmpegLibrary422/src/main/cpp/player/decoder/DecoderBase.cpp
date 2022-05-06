@@ -65,6 +65,7 @@ int DecoderBase::InitFFDecoder() {
         ret = avformat_open_input(&m_AVFormatContext, m_Url, NULL, NULL);
         if (ret < 0) {
             //文件打开失败
+            char *err = av_err2str(ret);
             break;
         }
         //3.获取音视频流信息
@@ -181,7 +182,7 @@ void DecoderBase::DecodingLoop() {
 
 void DecoderBase::UpdateTimeStamp() {
     std::unique_lock<std::mutex> lock(m_Mutex);
-    if(m_Frame->pkt_dts != AV_NOPTS_VALUE) {
+    if (m_Frame->pkt_dts != AV_NOPTS_VALUE) {
         m_CurTimeStamp = m_Frame->pkt_dts;
     } else if (m_Frame->pts != AV_NOPTS_VALUE) {
         m_CurTimeStamp = m_Frame->pts;
@@ -189,10 +190,10 @@ void DecoderBase::UpdateTimeStamp() {
         m_CurTimeStamp = 0;
     }
 
-    m_CurTimeStamp = (int64_t)((m_CurTimeStamp * av_q2d(m_AVFormatContext->streams[m_StreamIndex]->time_base)) * 1000);
+    m_CurTimeStamp = (int64_t) (
+            (m_CurTimeStamp * av_q2d(m_AVFormatContext->streams[m_StreamIndex]->time_base)) * 1000);
 
-    if(m_SeekPosition > 0 && m_SeekSuccess)
-    {
+    if (m_SeekPosition > 0 && m_SeekSuccess) {
         m_StartTimeStamp = TimeUtils::GetSysCurrentTime() - m_CurTimeStamp;
         m_SeekPosition = 0;
         m_SeekSuccess = false;
@@ -210,11 +211,11 @@ long DecoderBase::AVSync() {
     long delay = 0;
 
     //向系统时钟同步
-    if(m_CurTimeStamp > elapsedTime) {
+    if (m_CurTimeStamp > elapsedTime) {
         //休眠时间
         auto sleepTime = static_cast<unsigned int>(m_CurTimeStamp - elapsedTime);//ms
         //限制休眠时间不能过长
-        sleepTime = sleepTime > DELAY_THRESHOLD ? DELAY_THRESHOLD :  sleepTime;
+        sleepTime = sleepTime > DELAY_THRESHOLD ? DELAY_THRESHOLD : sleepTime;
         av_usleep(sleepTime * 1000);
     }
     delay = elapsedTime - m_CurTimeStamp;

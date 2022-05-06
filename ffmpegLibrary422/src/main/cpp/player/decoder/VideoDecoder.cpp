@@ -27,9 +27,9 @@ void VideoDecoder::OnDecoderReady() {
         av_image_fill_arrays(m_RGBAFrame->data, m_RGBAFrame->linesize,
                              m_FrameBuffer, DST_PIXEL_FORMAT, m_RenderWidth, m_RenderHeight, 1);
 
-//        m_SwsContext = sws_getContext(m_VideoWidth, m_VideoHeight, GetCodecContext()->pix_fmt,
-//                                      m_RenderWidth, m_RenderHeight, DST_PIXEL_FORMAT,
-//                                      SWS_FAST_BILINEAR, NULL, NULL, NULL);
+        m_SwsContext = sws_getContext(m_VideoWidth, m_VideoHeight, GetCodecContext()->pix_fmt,
+                                      m_RenderWidth, m_RenderHeight, DST_PIXEL_FORMAT,
+                                      SWS_FAST_BILINEAR, NULL, NULL, NULL);
     } else {
         //LOGCATE("VideoDecoder::OnDecoderReady m_VideoRender == null");
     }
@@ -55,7 +55,8 @@ void VideoDecoder::OnFrameAvailable(AVFrame *frame) {
     if (m_VideoRender != nullptr && frame != nullptr) {
         NativeImage image;
         if (m_VideoRender->GetRenderType() == VIDEO_RENDER_ANWINDOW) {
-            //sws_scale(m_SwsContext, frame->data, frame->linesize, 0,m_VideoHeight, m_RGBAFrame->data, m_RGBAFrame->linesize);
+            sws_scale(m_SwsContext, frame->data, frame->linesize, 0, m_VideoHeight,
+                      m_RGBAFrame->data, m_RGBAFrame->linesize);
 
             image.format = IMAGE_FORMAT_RGBA;
             image.width = m_RenderWidth;
@@ -101,7 +102,7 @@ void VideoDecoder::OnFrameAvailable(AVFrame *frame) {
             image.pLineSize[0] = frame->linesize[0];
             image.ppPlane[0] = frame->data[0];
         } else {
-            //sws_scale(m_SwsContext, frame->data, frame->linesize, 0,m_VideoHeight, m_RGBAFrame->data, m_RGBAFrame->linesize);
+            sws_scale(m_SwsContext, frame->data, frame->linesize, 0,m_VideoHeight, m_RGBAFrame->data, m_RGBAFrame->linesize);
             image.format = IMAGE_FORMAT_RGBA;
             image.width = m_RenderWidth;
             image.height = m_RenderHeight;

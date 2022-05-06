@@ -5,21 +5,19 @@ import android.content.Intent
 import android.os.Environment
 import android.view.SurfaceHolder
 import android.view.View
-import com.google.android.exoplayer2.Player
 import com.top.arch.base.BaseActivity
+import com.top.arch.utils.ScreenUtils
 import com.top.av.R
 import com.top.av.databinding.ActivityVideoPlayerBinding
 import com.top.ffmpeg.player.FFMediaPlayer
 import com.top.ffmpeg.player.FFMediaPlayer.VIDEO_RENDER_ANWINDOW
-import com.top.ffmpeg.player.LeoSurfaceView
 
-class VideoPlayerActivity:BaseActivity<ActivityVideoPlayerBinding>(),
+class VideoPlayerActivity : BaseActivity<ActivityVideoPlayerBinding>(),
     SurfaceHolder.Callback {
 
     private var mMediaPlayer: FFMediaPlayer? = null
-    private val mSurfaceView: LeoSurfaceView? = null
     private val mVideoPath =
-        Environment.getExternalStorageDirectory().absolutePath + "/in.mp4"
+        Environment.getExternalStorageDirectory().absolutePath + "/1.mp4"
 
     companion object {
         fun start(context: Context) {
@@ -35,6 +33,12 @@ class VideoPlayerActivity:BaseActivity<ActivityVideoPlayerBinding>(),
     override fun init(root: View?) {
 
         mDataBinding.leoSurfaceView.holder.addCallback(this)
+
+        mDataBinding.leoSurfaceView.setAspectRatio(
+            ScreenUtils.getScreenWidth(),
+            ScreenUtils.getScreenHeight()
+        )
+
     }
 
     override fun surfaceCreated(p0: SurfaceHolder) {
