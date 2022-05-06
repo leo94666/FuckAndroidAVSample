@@ -12,6 +12,7 @@ extern "C" {
 #include <libavutil/time.h>
 #include <libavcodec/jni.h>
 };
+
 #include "TimeUtils.h"
 #include "Decoder.h"
 #include <thread>
@@ -31,44 +32,60 @@ enum DecoderState {
 class DecoderBase : public Decoder {
 
 public:
-    void Start() override;
+    DecoderBase() {};
 
-    void Pause() override;
+    virtual ~DecoderBase() {};
 
-    void Stop() override;
+    void Start();
 
-    float GetDuration() override;
+    void Pause();
 
-    void SeekToPosition(float position) override;
+    void Stop();
 
-    float GetCurrentPosition() override;
+    float GetDuration();
 
-    virtual void ClearCache(){};
+    void SeekToPosition(float position);
+
+    float GetCurrentPosition();
+
+    virtual void ClearCache() {};
 
 protected:
     virtual int Init(const char *url, AVMediaType mediaType);
+
     virtual void UnInit();
+
     virtual void OnDecoderReady() = 0;
+
     virtual void OnDecoderDone() = 0;
+
     //解码数据的回调
     virtual void OnFrameAvailable(AVFrame *frame) = 0;
 
     AVCodecContext *GetCodecContext() {
         return m_AVCodecContext;
     }
+
 private:
     int InitFFDecoder();
+
     void UnInitDecoder();
+
     //启动解码线程
     void StartDecodingThread();
+
     //音视频解码循环
     void DecodingLoop();
+
     //更新显示时间戳
     void UpdateTimeStamp();
+
     //音视频同步
     long AVSync();
+
     //解码一个packet编码数据
     int DecodeOnePacket();
+
     //线程函数
     static void DoAVDecoding(DecoderBase *decoder);
 
@@ -96,15 +113,15 @@ private:
     int m_StreamIndex = -1;
 
     //seek position
-    volatile float      m_SeekPosition = 0;
-    volatile bool       m_SeekSuccess = false;
+    volatile float m_SeekPosition = 0;
+    volatile bool m_SeekSuccess = false;
     //解码器状态
-    volatile int  m_DecoderState = STATE_UNKNOWN;
+    volatile int m_DecoderState = STATE_UNKNOWN;
 
     //锁和条件变量
-    mutex               m_Mutex;
-    condition_variable  m_Cond;
-    thread             *m_Thread = nullptr;
+    mutex m_Mutex;
+    condition_variable m_Cond;
+    thread *m_Thread = nullptr;
 };
 
 

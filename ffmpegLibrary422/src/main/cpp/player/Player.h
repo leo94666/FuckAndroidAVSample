@@ -7,8 +7,7 @@
 
 
 #include <jni.h>
-#include "MediaPlayer.h"
-#include "libavcodec/jni.h"
+#include "mediaplayer/FFMediaPlayer.h"
 
 class Player {
 public:
@@ -33,7 +32,7 @@ public:
     void SetMediaParams(int paramType, jobject obj);
 
 private:
-    MediaPlayer *m_MediaPlayer = nullptr;
+    MediaPlayer* m_MediaPlayer = nullptr;
 };
 
 

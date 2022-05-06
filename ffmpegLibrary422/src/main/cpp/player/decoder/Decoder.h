@@ -7,20 +7,11 @@
 
 class Decoder {
 public:
-    Decoder() {};
-
-    ~Decoder() {};
-
     virtual void Start() = 0;
-
     virtual void Pause() = 0;
-
     virtual void Stop() = 0;
-
     virtual float GetDuration() = 0;
-
     virtual void SeekToPosition(float position) = 0;
-
     virtual float GetCurrentPosition() = 0;
 
 };

@@ -14,8 +14,7 @@ public:
 
     virtual ~MediaPlayer() {};
 
-    virtual void
-    Init(JNIEnv *env, jobject obj, char *url, int playerType, int renderType, jobject surface) = 0;
+    virtual void Init(JNIEnv *env, jobject obj, char *url,int renderType, jobject surface) = 0;
 
     virtual void UnInit() = 0;
 
@@ -29,8 +28,7 @@ public:
 
     virtual long GetMediaParams(int paramType) = 0;
 
-    virtual void SetMediaParams(int paramType, jobject obj) = 0;
-
+    virtual void SetMediaParams(int paramType, jobject obj){};
     virtual JNIEnv *GetJNIEnv(bool *isAttach) = 0;
 
     virtual jobject GetJavaObj() = 0;

@@ -3,11 +3,14 @@
 //
 
 #include "Player.h"
-#include "FFMediaPlayer.h"
-void
-Player::Init(JNIEnv *env, jobject obj, char *url, int playerType, int renderType, jobject surface) {
-    m_MediaPlayer = new FFMediaPlayer();
-    if (m_MediaPlayer) m_MediaPlayer->Init(env, obj, url, playerType, renderType, surface);
+
+void Player::Init(JNIEnv *env, jobject obj, char *url, int playerType, int renderType, jobject surface) {
+    //switch (playerType) {
+
+        m_MediaPlayer = new FFMediaPlayer();
+
+        if (m_MediaPlayer) m_MediaPlayer->Init(env, obj, url, renderType, surface);
+    //}
 }
 
 void Player::UnInit() {
