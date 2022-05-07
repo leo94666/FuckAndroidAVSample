@@ -6,8 +6,10 @@
 #define AV_FFMEDIAPLAYER_H
 
 
+#include <audio/AudioDecoder.h>
 #include "MediaPlayer.h"
-#include "VideoDecoder.h"
+#include "video/VideoDecoder.h"
+#include "../render/audio/OpenSLRender.h"
 
 class FFMediaPlayer : public MediaPlayer {
 
@@ -38,10 +40,10 @@ private:
     virtual JavaVM *GetJavaVM();
 
     VideoDecoder *m_VideoDecoder = nullptr;
-    //AudioDecoder *m_AudioDecoder = nullptr;
+    AudioDecoder *m_AudioDecoder = nullptr;
 
     VideoRender *m_VideoRender = nullptr;
-    //AudioRender *m_AudioRender = nullptr;
+    AudioRender *m_AudioRender = nullptr;
 };
 
 

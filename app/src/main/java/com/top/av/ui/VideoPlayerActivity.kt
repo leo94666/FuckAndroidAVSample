@@ -6,6 +6,7 @@ import android.os.Environment
 import android.view.SurfaceHolder
 import android.view.View
 import com.top.arch.base.BaseActivity
+import com.top.arch.utils.DataCenter
 import com.top.arch.utils.ScreenUtils
 import com.top.av.R
 import com.top.av.databinding.ActivityVideoPlayerBinding
@@ -16,10 +17,12 @@ class VideoPlayerActivity : BaseActivity<ActivityVideoPlayerBinding>(),
     SurfaceHolder.Callback {
 
     private var mMediaPlayer: FFMediaPlayer? = null
-    private val mVideoPath =
-        Environment.getExternalStorageDirectory().absolutePath + "/1.mp4"
+    // private val mVideoPath = Environment.getExternalStorageDirectory().absolutePath + "/1.mp4"
+
+    private var mVideoPath = Environment.getExternalStorageDirectory().absolutePath + "/1.mp4"
 
     companion object {
+
         fun start(context: Context) {
             val intent = Intent(context, VideoPlayerActivity::class.java)
             context.startActivity(intent)
@@ -31,14 +34,14 @@ class VideoPlayerActivity : BaseActivity<ActivityVideoPlayerBinding>(),
     }
 
     override fun init(root: View?) {
-
+        keepScreenOn()
+        //mVideoPath="https://links.jianshu.com/go?to=http%3A%2F%2Fqthttp.apple.com.edgesuite.net%2F1010qwoeiuryfg%2Fsl.m3u8"
+        //mVideoPath = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"
         mDataBinding.leoSurfaceView.holder.addCallback(this)
-
         mDataBinding.leoSurfaceView.setAspectRatio(
             ScreenUtils.getScreenWidth(),
-            ScreenUtils.getScreenHeight()
+            ScreenUtils.getScreenWidth() / 16 * 9
         )
-
     }
 
     override fun surfaceCreated(p0: SurfaceHolder) {

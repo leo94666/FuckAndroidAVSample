@@ -3,7 +3,7 @@
 //
 
 #include "FFMediaPlayer.h"
-#include "../render/NativeRender.h"
+#include "../render/video/NativeRender.h"
 
 FFMediaPlayer::~FFMediaPlayer() {
 
@@ -13,10 +13,10 @@ void FFMediaPlayer::Init(JNIEnv *env, jobject obj, char *url, int videoRenderTyp
     m_JavaObj = env->NewGlobalRef(obj);
 
     m_VideoDecoder = new VideoDecoder(url);
-    //  m_AudioDecoder = new AudioDecoder(url);
+    m_AudioDecoder = new AudioDecoder(url);
 
     if(videoRenderType == VIDEO_RENDER_OPENGL) {
-        // m_VideoDecoder->SetVideoRender(VideoGLRender::GetInstance());
+        //m_VideoDecoder->SetVideoRender(VideoGLRender::GetInstance());
     } else if (videoRenderType == VIDEO_RENDER_ANWINDOW) {
         m_VideoRender = new NativeRender(env, surface);
         m_VideoDecoder->SetVideoRender(m_VideoRender);
@@ -24,8 +24,8 @@ void FFMediaPlayer::Init(JNIEnv *env, jobject obj, char *url, int videoRenderTyp
         // m_VideoDecoder->SetVideoRender(VRGLRender::GetInstance());
     }
 
-    // m_AudioRender = new OpenSLRender();
-    // m_AudioDecoder->SetAudioRender(m_AudioRender);
+     m_AudioRender = new OpenSLRender();
+     m_AudioDecoder->setAudioRender(m_AudioRender);
 
     //m_VideoDecoder->SetMessageCallback(this, PostMessage);
     //  m_AudioDecoder->SetMessageCallback(this, PostMessage);
@@ -43,15 +43,15 @@ void FFMediaPlayer::UnInit() {
         m_VideoRender = nullptr;
     }
 
-//    if(m_AudioDecoder) {
-//        delete m_AudioDecoder;
-//        m_AudioDecoder = nullptr;
-//    }
-//
-//    if(m_AudioRender) {
-//        delete m_AudioRender;
-//        m_AudioRender = nullptr;
-//    }
+    if(m_AudioDecoder) {
+        delete m_AudioDecoder;
+        m_AudioDecoder = nullptr;
+    }
+
+    if(m_AudioRender) {
+        delete m_AudioRender;
+        m_AudioRender = nullptr;
+    }
 //
 //    VideoGLRender::ReleaseInstance();
 
@@ -65,32 +65,32 @@ void FFMediaPlayer::Play() {
     if(m_VideoDecoder)
         m_VideoDecoder->Start();
 //
-//    if(m_AudioDecoder)
-//        m_AudioDecoder->Start();
+    if(m_AudioDecoder)
+        m_AudioDecoder->Start();
 }
 
 void FFMediaPlayer::Pause() {
     if(m_VideoDecoder)
         m_VideoDecoder->Pause();
 
-//    if(m_AudioDecoder)
-//        m_AudioDecoder->Pause();
+    if(m_AudioDecoder)
+        m_AudioDecoder->Pause();
 }
 
 void FFMediaPlayer::Stop() {
     if(m_VideoDecoder)
         m_VideoDecoder->Stop();
 
-//    if(m_AudioDecoder)
-//        m_AudioDecoder->Stop();
+    if(m_AudioDecoder)
+        m_AudioDecoder->Stop();
 }
 
 void FFMediaPlayer::SeekToPosition(float position) {
     if(m_VideoDecoder)
         m_VideoDecoder->SeekToPosition(position);
 
-//    if(m_AudioDecoder)
-//        m_AudioDecoder->SeekToPosition(position);
+    if(m_AudioDecoder)
+        m_AudioDecoder->SeekToPosition(position);
 }
 
 long FFMediaPlayer::GetMediaParams(int paramType) {

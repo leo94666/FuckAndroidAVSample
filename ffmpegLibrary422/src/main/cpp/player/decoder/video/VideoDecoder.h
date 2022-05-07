@@ -5,13 +5,14 @@
 #ifndef AV_VIDEODECODER_H
 #define AV_VIDEODECODER_H
 
-#include "libswscale/swscale.h"
 extern "C" {
 #include <libavutil/imgutils.h>
+#include "libswscale/swscale.h"
+
 };
 
 #include "DecoderBase.h"
-#include "../render/VideoRender.h"
+#include "../../render/video/VideoRender.h"
 
 class VideoDecoder : public DecoderBase {
 
