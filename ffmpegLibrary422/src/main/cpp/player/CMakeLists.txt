@@ -18,9 +18,9 @@ add_library(LeoPlayer   # 库名称
         )            # 编译进库的源码
 
 target_link_libraries(LeoPlayer
-        ffmpeg
         LeoUtils
         android
+        ffmpeg
         ${log-lib})
 
 

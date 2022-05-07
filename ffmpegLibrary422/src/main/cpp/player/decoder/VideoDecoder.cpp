@@ -63,8 +63,7 @@ void VideoDecoder::OnFrameAvailable(AVFrame *frame) {
             image.height = m_RenderHeight;
             image.ppPlane[0] = m_RGBAFrame->data[0];
             image.pLineSize[0] = image.width * 4;
-        } else if (GetCodecContext()->pix_fmt == AV_PIX_FMT_YUV420P ||
-                   GetCodecContext()->pix_fmt == AV_PIX_FMT_YUVJ420P) {
+        } else if (GetCodecContext()->pix_fmt == AV_PIX_FMT_YUV420P || GetCodecContext()->pix_fmt == AV_PIX_FMT_YUVJ420P) {
             image.format = IMAGE_FORMAT_I420;
             image.width = frame->width;
             image.height = frame->height;
