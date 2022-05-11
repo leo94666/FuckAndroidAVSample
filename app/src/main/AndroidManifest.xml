@@ -35,7 +35,9 @@
             android:name=".ui.OpenGLESActivity"
             android:exported="true"
             android:label="OpenGLES"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait">
+
+        </activity>
         <activity
             android:name=".ui.CpuFeatureActivity"
             android:screenOrientation="portrait" />
@@ -43,7 +45,9 @@
             android:name=".ui.VideoEditorActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.VideoPlayerActivity"
+            android:name=".ui.AWindowNativeVideoPlayerActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".ui.VideoPlayerActivity"
             android:screenOrientation="portrait" />
     </application>
 

@@ -45,12 +45,11 @@ void OpenSLRender::ClearAudioCache() {
 }
 
 void OpenSLRender::RenderAudioFrame(uint8_t *pData, int dataSize) {
-    if(m_AudioPlayerPlay) {
+    if (m_AudioPlayerPlay) {
         if (pData != nullptr && dataSize > 0) {
 
             //temp resolution, when queue size is too big.
-            while(GetAudioFrameQueueSize() >= MAX_QUEUE_BUFFER_SIZE && !m_Exit)
-            {
+            while (GetAudioFrameQueueSize() >= MAX_QUEUE_BUFFER_SIZE && !m_Exit) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(15));
             }
 
@@ -99,8 +98,7 @@ void OpenSLRender::UnInit() {
     }
     lock.unlock();
 
-    if(m_thread != nullptr)
-    {
+    if (m_thread != nullptr) {
         m_thread->join();
         delete m_thread;
         m_thread = nullptr;
@@ -111,22 +109,19 @@ int OpenSLRender::CreateEngine() {
     SLresult result = SL_RESULT_SUCCESS;
     do {
         result = slCreateEngine(&m_EngineObj, 0, nullptr, 0, nullptr, nullptr);
-        if(result != SL_RESULT_SUCCESS)
-        {
+        if (result != SL_RESULT_SUCCESS) {
             //LOGCATE("OpenSLRender::CreateEngine slCreateEngine fail. result=%d", result);
             break;
         }
 
         result = (*m_EngineObj)->Realize(m_EngineObj, SL_BOOLEAN_FALSE);
-        if(result != SL_RESULT_SUCCESS)
-        {
+        if (result != SL_RESULT_SUCCESS) {
             //LOGCATE("OpenSLRender::CreateEngine Realize fail. result=%d", result);
             break;
         }
 
         result = (*m_EngineObj)->GetInterface(m_EngineObj, SL_IID_ENGINE, &m_EngineEngine);
-        if(result != SL_RESULT_SUCCESS)
-        {
+        if (result != SL_RESULT_SUCCESS) {
             //LOGCATE("OpenSLRender::CreateEngine GetInterface fail. result=%d", result);
             break;
         }
@@ -142,15 +137,13 @@ int OpenSLRender::CreateOutputMixer() {
         const SLboolean mreq[1] = {SL_BOOLEAN_FALSE};
 
         result = (*m_EngineEngine)->CreateOutputMix(m_EngineEngine, &m_OutputMixObj, 1, mids, mreq);
-        if(result != SL_RESULT_SUCCESS)
-        {
-           // LOGCATE("OpenSLRender::CreateOutputMixer CreateOutputMix fail. result=%d", result);
+        if (result != SL_RESULT_SUCCESS) {
+            // LOGCATE("OpenSLRender::CreateOutputMixer CreateOutputMix fail. result=%d", result);
             break;
         }
 
         result = (*m_OutputMixObj)->Realize(m_OutputMixObj, SL_BOOLEAN_FALSE);
-        if(result != SL_RESULT_SUCCESS)
-        {
+        if (result != SL_RESULT_SUCCESS) {
             //LOGCATE("OpenSLRender::CreateOutputMixer CreateOutputMix fail. result=%d", result);
             break;
         }
@@ -161,10 +154,11 @@ int OpenSLRender::CreateOutputMixer() {
 }
 
 int OpenSLRender::CreateAudioPlayer() {
-    SLDataLocator_AndroidSimpleBufferQueue android_queue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
+    SLDataLocator_AndroidSimpleBufferQueue android_queue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,
+                                                            2};
     SLDataFormat_PCM pcm = {
             SL_DATAFORMAT_PCM,//format type
-            (SLuint32)2,//channel count
+            (SLuint32) 2,//channel count
             SL_SAMPLINGRATE_44_1,//44100hz
             SL_PCMSAMPLEFORMAT_FIXED_16,// bits per sample
             SL_PCMSAMPLEFORMAT_FIXED_16,// container size
@@ -183,44 +177,42 @@ int OpenSLRender::CreateAudioPlayer() {
 
     do {
 
-        result = (*m_EngineEngine)->CreateAudioPlayer(m_EngineEngine, &m_AudioPlayerObj, &slDataSource, &slDataSink, 3, ids, req);
-        if(result != SL_RESULT_SUCCESS)
-        {
+        result = (*m_EngineEngine)->CreateAudioPlayer(m_EngineEngine, &m_AudioPlayerObj,
+                                                      &slDataSource, &slDataSink, 3, ids, req);
+        if (result != SL_RESULT_SUCCESS) {
             //LOGCATE("OpenSLRender::CreateAudioPlayer CreateAudioPlayer fail. result=%d", result);
             break;
         }
 
         result = (*m_AudioPlayerObj)->Realize(m_AudioPlayerObj, SL_BOOLEAN_FALSE);
-        if(result != SL_RESULT_SUCCESS)
-        {
+        if (result != SL_RESULT_SUCCESS) {
             //LOGCATE("OpenSLRender::CreateAudioPlayer Realize fail. result=%d", result);
             break;
         }
 
-        result = (*m_AudioPlayerObj)->GetInterface(m_AudioPlayerObj, SL_IID_PLAY, &m_AudioPlayerPlay);
-        if(result != SL_RESULT_SUCCESS)
-        {
+        result = (*m_AudioPlayerObj)->GetInterface(m_AudioPlayerObj, SL_IID_PLAY,
+                                                   &m_AudioPlayerPlay);
+        if (result != SL_RESULT_SUCCESS) {
             //LOGCATE("OpenSLRender::CreateAudioPlayer GetInterface fail. result=%d", result);
             break;
         }
 
-        result = (*m_AudioPlayerObj)->GetInterface(m_AudioPlayerObj, SL_IID_BUFFERQUEUE, &m_BufferQueue);
-        if(result != SL_RESULT_SUCCESS)
-        {
+        result = (*m_AudioPlayerObj)->GetInterface(m_AudioPlayerObj, SL_IID_BUFFERQUEUE,
+                                                   &m_BufferQueue);
+        if (result != SL_RESULT_SUCCESS) {
             //LOGCATE("OpenSLRender::CreateAudioPlayer GetInterface fail. result=%d", result);
             break;
         }
 
         result = (*m_BufferQueue)->RegisterCallback(m_BufferQueue, AudioPlayerCallback, this);
-        if(result != SL_RESULT_SUCCESS)
-        {
+        if (result != SL_RESULT_SUCCESS) {
             //LOGCATE("OpenSLRender::CreateAudioPlayer RegisterCallback fail. result=%d", result);
             break;
         }
 
-        result = (*m_AudioPlayerObj)->GetInterface(m_AudioPlayerObj, SL_IID_VOLUME, &m_AudioPlayerVolume);
-        if(result != SL_RESULT_SUCCESS)
-        {
+        result = (*m_AudioPlayerObj)->GetInterface(m_AudioPlayerObj, SL_IID_VOLUME,
+                                                   &m_AudioPlayerVolume);
+        if (result != SL_RESULT_SUCCESS) {
             //LOGCATE("OpenSLRender::CreateAudioPlayer GetInterface fail. result=%d", result);
             break;
         }
@@ -258,7 +250,8 @@ void OpenSLRender::HandleAudioFrameQueue() {
     std::unique_lock<std::mutex> lock(m_Mutex);
     AudioFrame *audioFrame = m_AudioFrameQueue.front();
     if (nullptr != audioFrame && m_AudioPlayerPlay) {
-        SLresult result = (*m_BufferQueue)->Enqueue(m_BufferQueue, audioFrame->data, (SLuint32) audioFrame->dataSize);
+        SLresult result = (*m_BufferQueue)->Enqueue(m_BufferQueue, audioFrame->data,
+                                                    (SLuint32) audioFrame->dataSize);
         if (result == SL_RESULT_SUCCESS) {
             //AudioGLRender::GetInstance()->UpdateAudioFrame(audioFrame);
             m_AudioFrameQueue.pop();
