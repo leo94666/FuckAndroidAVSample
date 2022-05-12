@@ -35,7 +35,7 @@ class OpenGLESActivity: BaseActivity<ActivityOpenGlBinding>() {
 
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_opengl_main, menu)
         return true
     }

@@ -134,7 +134,7 @@ public class VideoEditorActivity : BaseActivity<ActivityVideoEditorBinding>(),
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_ffmpeg_main, menu)
         return true
     }

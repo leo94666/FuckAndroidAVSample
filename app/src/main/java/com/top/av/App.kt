@@ -1,7 +1,6 @@
 package com.top.av
 
 import android.os.Environment
-import com.top.arch.BuildConfig
 import com.top.arch.base.BaseApplication
 import com.top.arch.logger.*
 import com.top.arch.logger.impl.FormatStrategy

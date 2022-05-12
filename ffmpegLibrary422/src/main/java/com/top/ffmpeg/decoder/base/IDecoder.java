@@ -1,4 +1,4 @@
-package com.top.ffmpeg.decoder;
+package com.top.ffmpeg.decoder.base;
 
 import android.media.MediaFormat;
 
