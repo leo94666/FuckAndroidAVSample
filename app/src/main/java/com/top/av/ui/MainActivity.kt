@@ -40,6 +40,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         btn_video_player.setOnClickListener {
             VideoPlayerActivity.start(this)
         }
+
+        btn_decoder_encode.setOnClickListener {
+            DecoderEncoderActivity.start(this)
+        }
     }
 
 

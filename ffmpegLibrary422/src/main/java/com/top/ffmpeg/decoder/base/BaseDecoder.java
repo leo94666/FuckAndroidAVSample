@@ -105,7 +105,7 @@ public abstract class BaseDecoder implements IDecoder {
 
 
     private boolean init() {
-        if (mFilePath.isEmpty() || new File(mFilePath).exists()) {
+        if (mFilePath.isEmpty() || !new File(mFilePath).exists()) {
             //文件不存在
             return false;
         }
