@@ -74,22 +74,28 @@ public class AudioDecoder extends BaseDecoder {
     protected boolean initRender() {
         int channel;
         if (mChannels == 1) {
-            channel = AudioFormat.CHANNEL_IN_MONO;
+            channel = AudioFormat.CHANNEL_OUT_MONO;
         } else {
-            channel = AudioFormat.CHANNEL_IN_STEREO;
+            channel = AudioFormat.CHANNEL_OUT_STEREO;
         }
 
+        //
         int minBufferSize = AudioTrack.getMinBufferSize(mSampleRate, channel, mPcmEncodeBit);
-        mAudioTrack = new AudioTrack(
-                AudioManager.STREAM_MUSIC,
-                mSampleRate,
-                channel,
-                mPcmEncodeBit,
-                minBufferSize,
-                AudioTrack.MODE_STREAM
-        );
-        mAudioTrack.play();
-        return true;
+
+        try {
+            mAudioTrack = new AudioTrack(
+                    AudioManager.STREAM_MUSIC,
+                    mSampleRate,
+                    channel,
+                    mPcmEncodeBit,
+                    minBufferSize,
+                    AudioTrack.MODE_STREAM
+            );
+            mAudioTrack.play();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
@@ -107,6 +113,4 @@ public class AudioDecoder extends BaseDecoder {
         mAudioTrack.stop();
         mAudioTrack.release();
     }
-
-
 }

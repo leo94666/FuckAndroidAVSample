@@ -1,12 +1,19 @@
 package com.top.ffmpeg.decoder.base;
 
+import android.media.AudioTrack;
 import android.media.MediaCodec;
+import android.media.MediaCrypto;
+import android.media.MediaDrm;
+import android.media.MediaExtractor;
 import android.media.MediaFormat;
+import android.media.MediaMuxer;
+import android.media.MediaSync;
 import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.logging.Logger;
 
 /**
  * @author leo
@@ -17,6 +24,8 @@ import java.nio.ByteBuffer;
  **/
 public abstract class BaseDecoder implements IDecoder {
 
+
+    private String TAG = "MediaCodec-BaseDecoder";
     /////////////////////////////////////////线程相关////////////////////////
 
     private boolean mRunning = true;
@@ -32,6 +41,13 @@ public abstract class BaseDecoder implements IDecoder {
 
     //音视频解码器
     private MediaCodec mCodec;
+    //private MediaExtractor mExtractor;
+    //private MediaSync mMediaSync;
+    //private MediaMuxer mMediaMuxer;
+    //private MediaCrypto mMediaCrypto;
+    //private MediaDrm mMediaDrm;
+    //private AudioTrack mAudioTrack;
+
     //音视频数据读取器
     private IExtractor mExtractor;
     //解码输入缓冲区
@@ -78,28 +94,49 @@ public abstract class BaseDecoder implements IDecoder {
         //1.初始化 2.启动解码器
         if (!init()) return;
 
-        while (mRunning) {
-            if (!mIsEOS) {
-                //如果数据没有解码完毕，将数据推入解码器解码
-                mIsEOS = pushBufferToDecoder();
+        try {
+            while (mRunning) {
+                if (mState != DecodeState.START &&
+                        mState != DecodeState.DECODING &&
+                        mState != DecodeState.SEEKING) {
+                    waitDecode();
+                    Log.i(TAG, "================waitDecode");
+                }
+
+                if (!mRunning || mState == DecodeState.STOP) {
+                    mRunning = false;
+                    Log.i(TAG, "================");
+                    break;
+                }
+                if (!mIsEOS) {
+                    //如果数据没有解码完毕，将数据推入解码器解码
+                    mIsEOS = pushBufferToDecoder();
+                } else {
+                    mRunning = false;
+                    Log.i(TAG, "================pushBufferToDecoder end");
+                    break;
+                }
+                //将解码好的数据从缓冲区取出来
+//            int index = pullBufferFromDecoder();
+//            if (index >= 0) {
+//                if (mSyncRender) {
+//                    render(mOutputBuffers[index], mBufferInfo);
+//                }
+//                Frame frame = new Frame();
+//                frame.setBuffer(mOutputBuffers[index]);
+//                frame.setBufferInfo(mBufferInfo);
+//
+//                mCodec.releaseOutputBuffer(index, true);
+//
+//                //【解码步骤：6. 判断解码是否完成】
+//                if (mBufferInfo.flags == MediaCodec.BUFFER_FLAG_END_OF_STREAM) {
+//                    mState = DecodeState.FINISH;
+//                }
+//            }
             }
 
-            int index = pullBufferFromDecoder();
-            if (index >= 0) {
-                if (mSyncRender) {
-                    render(mOutputBuffers[index], mBufferInfo);
-                }
-                Frame frame = new Frame();
-                frame.setBuffer(mOutputBuffers[index]);
-                frame.setBufferInfo(mBufferInfo);
-
-                mCodec.releaseOutputBuffer(index, true);
-
-                //【解码步骤：6. 判断解码是否完成】
-                if (mBufferInfo.flags == MediaCodec.BUFFER_FLAG_END_OF_STREAM) {
-                    mState = DecodeState.FINISH;
-                }
-            }
+        } catch (Exception e) {
+            Log.i(TAG,"==============");
         }
     }
 
@@ -127,6 +164,8 @@ public abstract class BaseDecoder implements IDecoder {
         try {
             MediaFormat format = mExtractor.getFormat();
             mDuration = format.getLong(MediaFormat.KEY_DURATION) / 1000;
+            if (mEndPos == 0L) mEndPos = mDuration;
+            initSpecParams(mExtractor.getFormat());
         } catch (Exception e) {
             return false;
         }
@@ -137,8 +176,13 @@ public abstract class BaseDecoder implements IDecoder {
         try {
             String type = mExtractor.getFormat().getString(MediaFormat.KEY_MIME);
             mCodec = MediaCodec.createDecoderByType(type);
+            if (!configCodec(mCodec, mExtractor.getFormat())) {
+                waitDecode();
+            }
             mCodec.start();
+            //获取需要编码数据的输入流队列，返回的是一个ByteBuffer数组
             mInputBuffers = mCodec.getInputBuffers();
+            //获取编解码之后的数据输出流队列，返回的是一个ByteBuffer数组
             mOutputBuffers = mCodec.getOutputBuffers();
         } catch (IOException e) {
             e.printStackTrace();
@@ -148,15 +192,18 @@ public abstract class BaseDecoder implements IDecoder {
     }
 
     private boolean pushBufferToDecoder() {
-        int inputBufferIndex = mCodec.dequeueInputBuffer(2000);
+        //从输入流队列中取数据进行编码操作
+        int inputBufferIndex = mCodec.dequeueInputBuffer(1000);
         boolean isEndOfStream = false;
         if (inputBufferIndex >= 0) {
             ByteBuffer inputBuffer = mInputBuffers[inputBufferIndex];
             int sampleSize = mExtractor.readBuffer(inputBuffer);
             if (sampleSize < 0) {
+                //输入流入队列
                 mCodec.queueInputBuffer(inputBufferIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
                 isEndOfStream = true;
             } else {
+                //输入流入队列
                 mCodec.queueInputBuffer(inputBufferIndex, 0, sampleSize, mExtractor.getCurrentTimestamp(), 0);
             }
         }
@@ -164,6 +211,7 @@ public abstract class BaseDecoder implements IDecoder {
     }
 
     private int pullBufferFromDecoder() {
+        //从输出队列中取出编码操作之后的数据
         int index = mCodec.dequeueOutputBuffer(mBufferInfo, 1000);
         switch (index) {
             case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:

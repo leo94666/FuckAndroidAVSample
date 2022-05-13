@@ -23,6 +23,7 @@ class DecoderEncoderActivity: BaseActivity<ActivityDecoderEncoderBinding>() {
     }
 
     override fun init(root: View?) {
+        keepScreenOn()
 
         val audioDecoder =
             AudioDecoder(Environment.getExternalStorageDirectory().absolutePath + "/1.mp4")

@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 
 public interface IExtractor {
     //获取音视频格式参数
+
     MediaFormat getFormat();
     //读取音视频数据
     int readBuffer(ByteBuffer buffer);
