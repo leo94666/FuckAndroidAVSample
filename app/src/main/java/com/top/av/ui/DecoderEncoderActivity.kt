@@ -5,12 +5,19 @@ import android.content.Intent
 import android.os.Environment
 import android.view.View
 import com.top.arch.base.BaseActivity
+import com.top.arch.utils.DataCenter
+import com.top.arch.utils.ThreadUtils
 import com.top.av.R
 import com.top.av.databinding.ActivityDecoderEncoderBinding
 import com.top.ffmpeg.decoder.decoder.AudioDecoder
+import com.top.ffmpeg.decoder.decoder.VideoDecoder
 import java.util.concurrent.Executors
 
 class DecoderEncoderActivity: BaseActivity<ActivityDecoderEncoderBinding>() {
+
+    var audioDecoder: AudioDecoder? = null
+    var videoDecoder: VideoDecoder? = null
+
     companion object {
         fun start(context: Context) {
             var intent = Intent(context, DecoderEncoderActivity::class.java)
@@ -24,15 +31,23 @@ class DecoderEncoderActivity: BaseActivity<ActivityDecoderEncoderBinding>() {
 
     override fun init(root: View?) {
         keepScreenOn()
-
-        val audioDecoder =
-            AudioDecoder(Environment.getExternalStorageDirectory().absolutePath + "/1.mp4")
-
+        val s = Environment.getExternalStorageDirectory().absolutePath + "/1.mp4"
+        audioDecoder = AudioDecoder(s)
+        videoDecoder= VideoDecoder(s,mDataBinding.surfaceView,null)
 
         val threadPool = Executors.newFixedThreadPool(10)
         threadPool.execute(audioDecoder)
+        //threadPool.execute(videoDecoder)
 
+        audioDecoder?.resume()
+       // videoDecoder?.resume()
+    }
 
-        //audioDecoder.start()
+    override fun onDestroy() {
+        super.onDestroy()
+        audioDecoder?.stop()
+        videoDecoder?.stop()
+
     }
 }
+

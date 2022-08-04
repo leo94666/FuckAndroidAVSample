@@ -30,9 +30,9 @@ public abstract class BaseDecoder implements IDecoder {
 
     private boolean mRunning = true;
 
-    private Object mLock = new Object();
+    //线程等待锁
+    private final Object mLock = new Object();
 
-    private boolean mReadyForDecode = false;
 
     /////////////////////////////////////////解码相关////////////////////////
 
@@ -85,59 +85,90 @@ public abstract class BaseDecoder implements IDecoder {
 
     public BaseDecoder(String mFilePath) {
         this.mFilePath = mFilePath;
+        mBufferInfo = new MediaCodec.BufferInfo();
+
     }
 
     @Override
     public void run() {
         mState = DecodeState.START;
-
         //1.初始化 2.启动解码器
         if (!init()) return;
-
         try {
+            Log.i(TAG, "================Decode start");
             while (mRunning) {
-                if (mState != DecodeState.START &&
-                        mState != DecodeState.DECODING &&
-                        mState != DecodeState.SEEKING) {
+                if (mState != DecodeState.START && mState != DecodeState.DECODING && mState != DecodeState.SEEKING) {
                     waitDecode();
                     Log.i(TAG, "================waitDecode");
+                    mStartTimeForSync = System.currentTimeMillis() - getCurTimeStamp();
                 }
 
                 if (!mRunning || mState == DecodeState.STOP) {
                     mRunning = false;
-                    Log.i(TAG, "================");
                     break;
                 }
+
+                if (mStartTimeForSync == -1L) {
+                    mStartTimeForSync = System.currentTimeMillis();
+                }
+
                 if (!mIsEOS) {
                     //如果数据没有解码完毕，将数据推入解码器解码
                     mIsEOS = pushBufferToDecoder();
-                } else {
-                    mRunning = false;
-                    Log.i(TAG, "================pushBufferToDecoder end");
-                    break;
                 }
                 //将解码好的数据从缓冲区取出来
-//            int index = pullBufferFromDecoder();
-//            if (index >= 0) {
-//                if (mSyncRender) {
-//                    render(mOutputBuffers[index], mBufferInfo);
-//                }
-//                Frame frame = new Frame();
-//                frame.setBuffer(mOutputBuffers[index]);
-//                frame.setBufferInfo(mBufferInfo);
-//
-//                mCodec.releaseOutputBuffer(index, true);
-//
-//                //【解码步骤：6. 判断解码是否完成】
-//                if (mBufferInfo.flags == MediaCodec.BUFFER_FLAG_END_OF_STREAM) {
-//                    mState = DecodeState.FINISH;
-//                }
-//            }
+                int index = pullBufferFromDecoder();
+                if (index >= 0) {
+                    //音视频同步
+                    if (mSyncRender && mState == DecodeState.DECODING) {
+                        sleepRender();
+                    }
+                    if (mSyncRender) {
+                        render(mOutputBuffers[index], mBufferInfo);
+                    }
+                    Frame frame = new Frame();
+                    frame.setBuffer(mOutputBuffers[index]);
+                    frame.setBufferInfo(mBufferInfo);
+                    mCodec.releaseOutputBuffer(index, true);
+                    //【解码步骤：6. 判断解码是否完成】
+                    if (mBufferInfo.flags == MediaCodec.BUFFER_FLAG_END_OF_STREAM) {
+                        mState = DecodeState.FINISH;
+                        Log.i(TAG, "================Decode finish");
+                    }
+                }
             }
 
         } catch (Exception e) {
-            Log.i(TAG,"==============");
+            Log.i(TAG, "==============");
+        } finally {
+            doneDecode();
+            release();
         }
+    }
+
+    private void sleepRender() {
+        long passTime = System.currentTimeMillis() - mStartTimeForSync;
+        long curTime = getCurTimeStamp();
+        if (curTime > passTime) {
+            try {
+                Thread.sleep(curTime - passTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void release() {
+        try {
+            mState = DecodeState.STOP;
+            mIsEOS = false;
+            mExtractor.stop();
+            mCodec.stop();
+            mCodec.release();
+        }catch(Exception e){
+
+        }
+
     }
 
 
@@ -239,9 +270,12 @@ public abstract class BaseDecoder implements IDecoder {
         }
     }
 
-    private void notifyDecode() {
+    protected void notifyDecode() {
         synchronized (mLock) {
+            //唤醒对象的等待池中的所有线程，进入锁池。
             mLock.notifyAll();
+            //随机唤醒对象的等待池中的一个线程，进入锁池
+            //mLock.notify();
         }
     }
 
@@ -275,13 +309,14 @@ public abstract class BaseDecoder implements IDecoder {
     @Override
     public void resume() {
         mState = DecodeState.DECODING;
-
+        notifyDecode();
     }
 
     @Override
     public void stop() {
         mState = DecodeState.STOP;
         mRunning = false;
+        notifyDecode();
     }
 
     @Override
@@ -312,6 +347,12 @@ public abstract class BaseDecoder implements IDecoder {
     @Override
     public long getDuration() {
         return mDuration;
+    }
+
+
+    @Override
+    public long getCurTimeStamp() {
+        return mBufferInfo.presentationTimeUs / 1000;
     }
 
     @Override

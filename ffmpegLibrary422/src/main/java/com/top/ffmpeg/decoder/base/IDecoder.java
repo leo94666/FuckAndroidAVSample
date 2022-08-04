@@ -23,6 +23,8 @@ public interface IDecoder extends Runnable {
     int getHeight();
     //获取视频长
     long getDuration();
+    //当前帧时间，单位：ms
+    long getCurTimeStamp();
     //获取视频旋转角度
     int getRotationAngle();
     // 获取音视频对应的格式参数
