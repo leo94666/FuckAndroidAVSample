@@ -25,6 +25,12 @@ class VideoPlayerActivity:BaseActivity<ActivityVideoPlayerBinding>() {
         mDataBinding.btnNativeWindow.setOnClickListener {
             AWindowNativeVideoPlayerActivity.start(this)
         }
+
+
+
+        mDataBinding.btnExoPlayer.setOnClickListener {
+            ExoPlayerActivity.start(this)
+        }
     }
 
     override fun hideTitleBar() {
