@@ -21,7 +21,6 @@ class WebRTCClient(var context: Context, var surfaceView: SurfaceViewRenderer) {
     private var rootEglBase: EglBase? = null
 
     private var ICEServers = LinkedList<IceServer>()
-    private val pcConstraints = MediaConstraints()
 
     private var mLocalMediaStream: MediaStream? = null
     private var localAudioTrack: AudioTrack? = null
@@ -32,9 +31,7 @@ class WebRTCClient(var context: Context, var surfaceView: SurfaceViewRenderer) {
 
     init {
         try {
-
             rootEglBase = EglBase.create()
-
             surfaceView.init(rootEglBase?.eglBaseContext, object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
 
@@ -43,7 +40,6 @@ class WebRTCClient(var context: Context, var surfaceView: SurfaceViewRenderer) {
                 override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
 
                 }
-
             })
             val options: PeerConnectionFactory.InitializationOptions =
                 PeerConnectionFactory.InitializationOptions.builder(context)
@@ -69,53 +65,11 @@ class WebRTCClient(var context: Context, var surfaceView: SurfaceViewRenderer) {
             audioSource = mPeerConnectionFactory?.createAudioSource(createAudioConstraints())
             localAudioTrack = mPeerConnectionFactory?.createAudioTrack("ARDAMSa0", audioSource)
 
-
-            //采集视频
-            //创建需要传入设备的名称
-//            val videoConstraints = MediaConstraints()
-//            videoConstraints.mandatory.add(
-//                MediaConstraints.KeyValuePair(
-//                    "maxHeight",
-//                    "720"
-//                )
-//            )
-//            videoConstraints.mandatory.add(
-//                MediaConstraints.KeyValuePair(
-//                    "maxWidth",
-//                    "360"
-//                )
-//            )
-//            videoConstraints.mandatory.add(
-//                MediaConstraints.KeyValuePair(
-//                    "maxFrameRate",
-//                    "10"
-//                )
-//            )
-//            videoConstraints.mandatory.add(
-//                MediaConstraints.KeyValuePair(
-//                    "minFrameRate",
-//                    "10"
-//                )
-//            )
-//
-//
-
-            // localVideoTrack = mPeerConnectionFactory?.createVideoTrack("ARDAMSv0", videoSource)
-
             //添加Track
             mLocalMediaStream?.addTrack(localAudioTrack)
-            // mLocalMediaStream?.addTrack(localVideoTrack)
-
-
-            //localPeer?.mPeerConnection?.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO)
-
-            // Log.v(TAG, "mLocalMediaStream=${mLocalMediaStream?.audioTracks?.size},${mLocalMediaStream?.videoTracks?.size}")
 
             //创建端Peer
             localPeer = Peer()
-
-            //val rtpTransceiverInit = RtpTransceiver(1)
-            // localPeer?.mPeerConnection?.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO)
 
             //localPeer?.mPeerConnection?.addStream(mLocalMediaStream)
             localPeer?.mPeerConnection?.createOffer(object : SdpObserver {
@@ -164,7 +118,7 @@ class WebRTCClient(var context: Context, var surfaceView: SurfaceViewRenderer) {
             .createPeerConnectionFactory()
     }
 
-    private fun offerOrAnswerConstraint(): MediaConstraints? {
+    private fun offerOrAnswerConstraint(): MediaConstraints {
         val mediaConstraints = MediaConstraints()
         val keyValuePairs = ArrayList<MediaConstraints.KeyValuePair>()
         keyValuePairs.add(MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"))
@@ -229,7 +183,6 @@ class WebRTCClient(var context: Context, var surfaceView: SurfaceViewRenderer) {
         call.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 Log.i(TAG, "=========onCreateSuccess========")
-
             }
 
             override fun onResponse(call: Call, response: Response) {
