@@ -1,6 +1,7 @@
 package com.top.av.webrtc
 
 import android.content.Context
+import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_AUDIO
 import android.util.Log
 import com.google.gson.Gson
 import okhttp3.*
@@ -23,7 +24,12 @@ class WebRTCClient(var context: Context) {
     private val pcConstraints = MediaConstraints()
 
     private var mLocalMediaStream: MediaStream? = null
+    private val localVideoTrack: VideoTrack? = null
+    private var localAudioTrack: AudioTrack? = null
+    private var audioSource: AudioSource? = null
 
+    private var localPeer: Peer? = null
+    private var remotePeer: Peer? = null
 
     init {
         try {
@@ -36,19 +42,30 @@ class WebRTCClient(var context: Context) {
 
             mPeerConnectionFactory = PeerConnectionFactory.builder().createPeerConnectionFactory()
 
-            mLocalMediaStream = mPeerConnectionFactory!!.createLocalMediaStream("ARDAMS")
 
-            val localPeer = Peer()
+            //创建媒体流
+            mLocalMediaStream = mPeerConnectionFactory?.createLocalMediaStream("ARDAMS")
+            //采集音频
+            audioSource = mPeerConnectionFactory?.createAudioSource(createAudioConstraints())
+            localAudioTrack = mPeerConnectionFactory?.createAudioTrack("ARDAMSa0", audioSource)
 
-            localPeer.mPeerConnection?.createOffer(localPeer, offerOrAnswerConstraint())
+            //添加Track
+            mLocalMediaStream?.addTrack(localAudioTrack)
 
-            Log.i(TAG, "=========onCreateSuccess========")
+            //localPeer?.mPeerConnection?.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO)
 
+            //创建端Peer
+            remotePeer = Peer(false)
+
+            localPeer = Peer(true)
+            localPeer?.mPeerConnection?.createOffer(localPeer, offerOrAnswerConstraint())
+
+            localPeer?.mPeerConnection?.addStream(mLocalMediaStream)
+
+            Log.i(TAG, "=========init========")
         } catch (e: Exception) {
-            Log.i(TAG, "=========onCreateSuccess========")
+            Log.i(TAG, "=========init failure========$e")
         }
-
-        Log.i(TAG, "=========onCreateSuccess========")
     }
 
 
@@ -89,13 +106,45 @@ class WebRTCClient(var context: Context) {
     }
 
 
+    private fun createAudioConstraints(): MediaConstraints {
+        val audioConstraints = MediaConstraints()
+        audioConstraints.mandatory.add(
+            MediaConstraints.KeyValuePair(
+                "googEchoCancellation",
+                "true"
+            )
+        )
+        audioConstraints.mandatory.add(
+            MediaConstraints.KeyValuePair(
+                "googAutoGainControl",
+                "false"
+            )
+        )
+        audioConstraints.mandatory.add(
+            MediaConstraints.KeyValuePair(
+                "googHighpassFilter",
+                "true"
+            )
+        )
+        audioConstraints.mandatory.add(
+            MediaConstraints.KeyValuePair(
+                "googNoiseSuppression",
+                "true"
+            )
+        )
+        return audioConstraints
+    }
+
+
     private fun quest(sdp: String) {
-        val url = "http://124.223.98.45/elab/api/webrtc"
-        val okHttpClient = OkHttpClient.Builder().build()
+        val url = "http://124.223.98.45/elab/api/webrtc?app=live&stream=test&type=play"
+        val okHttpClient = OkHttpClient.Builder()
+            .build()
 
         val mediaType = MediaType.parse("text/plain; charset=utf-8")
         val body =
-            RequestBody.create(mediaType, sdp)
+            RequestBody
+                .create(mediaType, sdp)
 
         val request: Request = Request.Builder()
             .url(url)
@@ -103,7 +152,7 @@ class WebRTCClient(var context: Context) {
             .build()
 
         val call: Call = okHttpClient.newCall(request)
-https://gitee.com/luisliuyi/webrtc-android02.git
+
         call.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 Log.i(TAG, "=========onCreateSuccess========")
@@ -112,22 +161,29 @@ https://gitee.com/luisliuyi/webrtc-android02.git
 
             override fun onResponse(call: Call, response: Response) {
 
-                val body = response.body().toString()
-                val sdpResponse = Gson().fromJson<SdpResponse>(body, SdpResponse::class.java)
+                val body = response.body()?.string()
+                val sdpResponse = Gson().fromJson(body, SdpResponse::class.java)
 
-                var sdp = SessionDescription(
-                    SessionDescription.Type.fromCanonicalForm(sdpResponse.type),
-                    sdpResponse.sdp
-                )
+                try {
+                    val sdp = SessionDescription(
+                        SessionDescription.Type.fromCanonicalForm(sdpResponse.type),
+                        sdpResponse.sdp
+                    )
 
+                    localPeer?.mPeerConnection?.setRemoteDescription(remotePeer, sdp)
+                    localPeer?.mPeerConnection?.createAnswer(localPeer, offerOrAnswerConstraint())
+                } catch (e: Exception) {
+                    Log.e(TAG, "==============$e")
+                }
             }
 
         })
     }
 
-    inner class Peer : SdpObserver, PeerConnection.Observer {
+    inner class Peer(b: Boolean) : SdpObserver, PeerConnection.Observer {
 
         var mPeerConnection: PeerConnection? = null
+        var b: Boolean = b
 
         init {
             this.mPeerConnection = createPeerConnection()
@@ -136,19 +192,23 @@ https://gitee.com/luisliuyi/webrtc-android02.git
 
         //初始化 RTCPeerConnection 连接管道
         private fun createPeerConnection(): PeerConnection? {
+
             if (mPeerConnectionFactory == null) {
                 mPeerConnectionFactory = createConnectionFactory()
             }
             // 管道连接抽象类实现方法
             val rtcConfig = RTCConfiguration(ICEServers)
             return mPeerConnectionFactory?.createPeerConnection(rtcConfig, this)
+
         }
 
 
         override fun onCreateSuccess(sdp: SessionDescription?) {
-            Log.v(TAG, " PeerConnectionManager  sdp创建成功       " + sdp?.description)
+            Log.v(TAG, "PeerConnectionManager  sdp创建成功       \n" + sdp?.description)
             mPeerConnection?.setLocalDescription(this, sdp)
-            quest(sdp?.description!!)
+            if (b) {
+                quest(sdp?.description!!)
+            }
         }
 
         override fun onSetSuccess() {
@@ -196,8 +256,8 @@ https://gitee.com/luisliuyi/webrtc-android02.git
 
         }
 
-        override fun onAddStream(p0: MediaStream?) {
-            Log.i(TAG, "=========onAddStream========")
+        override fun onAddStream(mediaStream: MediaStream?) {
+            Log.i(TAG, "=========onAddStream========" + mediaStream?.id)
 
         }
 
