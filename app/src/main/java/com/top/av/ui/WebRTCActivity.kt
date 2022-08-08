@@ -14,8 +14,7 @@ class WebRTCActivity : BaseActivity<ActivityWebRtcBinding>(), SdpObserver {
     override fun init(root: View?) {
 
 
-        val webRTCClient = WebRTCClient(this)
-
+        val webRTCClient = WebRTCClient(this,mDataBinding.surfaceView)
 
 
 //        val url = "http://124.223.98.45/elab/api/webrtc"
@@ -42,9 +41,6 @@ class WebRTCActivity : BaseActivity<ActivityWebRtcBinding>(), SdpObserver {
 //            }
 //
 //        })
-
-
-
     }
 
     override fun getLayout(): Int {

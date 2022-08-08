@@ -76,6 +76,7 @@ dependencies {
 
     implementation 'io.socket:socket.io-client:2.1.0'
     implementation 'org.webrtc:google-webrtc:1.0.32006'
+    //implementation 'org.webrtc:google-webrtc:1.0.23171'
     implementation 'pub.devrel:easypermissions:3.0.0'
 
 }

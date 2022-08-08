@@ -1,7 +1,6 @@
 package com.top.av.webrtc
 
 import android.content.Context
-import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_AUDIO
 import android.util.Log
 import com.google.gson.Gson
 import okhttp3.*
@@ -12,9 +11,10 @@ import org.webrtc.audio.JavaAudioDeviceModule
 import java.io.IOException
 import java.util.*
 
+
 data class SdpResponse(var code: Int, var id: String, var sdp: String, var type: String)
 
-class WebRTCClient(var context: Context) {
+class WebRTCClient(var context: Context, var surfaceView: SurfaceViewRenderer) {
 
 
     private var mPeerConnectionFactory: PeerConnectionFactory? = null
@@ -24,24 +24,44 @@ class WebRTCClient(var context: Context) {
     private val pcConstraints = MediaConstraints()
 
     private var mLocalMediaStream: MediaStream? = null
-    private val localVideoTrack: VideoTrack? = null
     private var localAudioTrack: AudioTrack? = null
     private var audioSource: AudioSource? = null
 
     private var localPeer: Peer? = null
-    private var remotePeer: Peer? = null
+
 
     init {
         try {
 
             rootEglBase = EglBase.create()
+
+            surfaceView.init(rootEglBase?.eglBaseContext, object : RendererCommon.RendererEvents {
+                override fun onFirstFrameRendered() {
+
+                }
+
+                override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
+
+                }
+
+            })
             val options: PeerConnectionFactory.InitializationOptions =
                 PeerConnectionFactory.InitializationOptions.builder(context)
+                    .setEnableInternalTracer(false)
                     .createInitializationOptions()
+
             PeerConnectionFactory.initialize(options)
 
-            mPeerConnectionFactory = PeerConnectionFactory.builder().createPeerConnectionFactory()
 
+            val videoDecoderFactory: VideoDecoderFactory =
+                DefaultVideoDecoderFactory(rootEglBase?.eglBaseContext)
+            val videoEncoderFactory: VideoEncoderFactory =
+                DefaultVideoEncoderFactory(rootEglBase?.eglBaseContext, true, true)
+
+            mPeerConnectionFactory = PeerConnectionFactory.builder()
+                .setVideoDecoderFactory(videoDecoderFactory)
+                .setVideoEncoderFactory(videoEncoderFactory)
+                .createPeerConnectionFactory()
 
             //创建媒体流
             mLocalMediaStream = mPeerConnectionFactory?.createLocalMediaStream("ARDAMS")
@@ -49,18 +69,71 @@ class WebRTCClient(var context: Context) {
             audioSource = mPeerConnectionFactory?.createAudioSource(createAudioConstraints())
             localAudioTrack = mPeerConnectionFactory?.createAudioTrack("ARDAMSa0", audioSource)
 
+
+            //采集视频
+            //创建需要传入设备的名称
+//            val videoConstraints = MediaConstraints()
+//            videoConstraints.mandatory.add(
+//                MediaConstraints.KeyValuePair(
+//                    "maxHeight",
+//                    "720"
+//                )
+//            )
+//            videoConstraints.mandatory.add(
+//                MediaConstraints.KeyValuePair(
+//                    "maxWidth",
+//                    "360"
+//                )
+//            )
+//            videoConstraints.mandatory.add(
+//                MediaConstraints.KeyValuePair(
+//                    "maxFrameRate",
+//                    "10"
+//                )
+//            )
+//            videoConstraints.mandatory.add(
+//                MediaConstraints.KeyValuePair(
+//                    "minFrameRate",
+//                    "10"
+//                )
+//            )
+//
+//
+
+            // localVideoTrack = mPeerConnectionFactory?.createVideoTrack("ARDAMSv0", videoSource)
+
             //添加Track
             mLocalMediaStream?.addTrack(localAudioTrack)
+            // mLocalMediaStream?.addTrack(localVideoTrack)
+
 
             //localPeer?.mPeerConnection?.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO)
 
+            // Log.v(TAG, "mLocalMediaStream=${mLocalMediaStream?.audioTracks?.size},${mLocalMediaStream?.videoTracks?.size}")
+
             //创建端Peer
-            remotePeer = Peer(false)
+            localPeer = Peer()
 
-            localPeer = Peer(true)
-            localPeer?.mPeerConnection?.createOffer(localPeer, offerOrAnswerConstraint())
+            //val rtpTransceiverInit = RtpTransceiver(1)
+            // localPeer?.mPeerConnection?.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO)
 
-            localPeer?.mPeerConnection?.addStream(mLocalMediaStream)
+            //localPeer?.mPeerConnection?.addStream(mLocalMediaStream)
+            localPeer?.mPeerConnection?.createOffer(object : SdpObserver {
+                override fun onCreateSuccess(sdp: SessionDescription?) {
+                    Log.v(TAG, "PeerConnectionManager  sdp创建成功       \n" + sdp?.description)
+                    localPeer?.mPeerConnection?.setLocalDescription(this, sdp)
+                    localPeer?.mPeerConnection?.addStream(mLocalMediaStream)
+
+                    quest(sdp?.description!!)
+                }
+
+                override fun onSetSuccess() {}
+
+                override fun onCreateFailure(p0: String?) {}
+
+                override fun onSetFailure(p0: String?) {}
+
+            }, offerOrAnswerConstraint())
 
             Log.i(TAG, "=========init========")
         } catch (e: Exception) {
@@ -169,9 +242,25 @@ class WebRTCClient(var context: Context) {
                         SessionDescription.Type.fromCanonicalForm(sdpResponse.type),
                         sdpResponse.sdp
                     )
+                    //remotePeer = Peer()
+                    localPeer?.mPeerConnection?.setRemoteDescription(object : SdpObserver {
+                        override fun onCreateSuccess(p0: SessionDescription?) {
 
-                    localPeer?.mPeerConnection?.setRemoteDescription(remotePeer, sdp)
-                    localPeer?.mPeerConnection?.createAnswer(localPeer, offerOrAnswerConstraint())
+                        }
+
+                        override fun onSetSuccess() {
+
+                        }
+
+                        override fun onCreateFailure(p0: String?) {
+
+                        }
+
+                        override fun onSetFailure(p0: String?) {
+
+                        }
+
+                    }, sdp)
                 } catch (e: Exception) {
                     Log.e(TAG, "==============$e")
                 }
@@ -180,10 +269,9 @@ class WebRTCClient(var context: Context) {
         })
     }
 
-    inner class Peer(b: Boolean) : SdpObserver, PeerConnection.Observer {
+    inner class Peer : PeerConnection.Observer {
 
         var mPeerConnection: PeerConnection? = null
-        var b: Boolean = b
 
         init {
             this.mPeerConnection = createPeerConnection()
@@ -192,7 +280,6 @@ class WebRTCClient(var context: Context) {
 
         //初始化 RTCPeerConnection 连接管道
         private fun createPeerConnection(): PeerConnection? {
-
             if (mPeerConnectionFactory == null) {
                 mPeerConnectionFactory = createConnectionFactory()
             }
@@ -202,29 +289,6 @@ class WebRTCClient(var context: Context) {
 
         }
 
-
-        override fun onCreateSuccess(sdp: SessionDescription?) {
-            Log.v(TAG, "PeerConnectionManager  sdp创建成功       \n" + sdp?.description)
-            mPeerConnection?.setLocalDescription(this, sdp)
-            if (b) {
-                quest(sdp?.description!!)
-            }
-        }
-
-        override fun onSetSuccess() {
-            Log.i(TAG, "=========onSetSuccess========")
-
-        }
-
-        override fun onCreateFailure(p0: String?) {
-            Log.i(TAG, "=========onCreateFailure========")
-
-        }
-
-        override fun onSetFailure(p0: String?) {
-            Log.i(TAG, "=========onSetFailure========")
-
-        }
 
         override fun onSignalingChange(p0: PeerConnection.SignalingState?) {
             Log.i(TAG, "=========onSignalingChange========")
@@ -238,27 +302,28 @@ class WebRTCClient(var context: Context) {
 
         override fun onIceConnectionReceivingChange(p0: Boolean) {
             Log.i(TAG, "=========onIceConnectionReceivingChange========")
-
         }
 
         override fun onIceGatheringChange(p0: PeerConnection.IceGatheringState?) {
             Log.i(TAG, "=========onIceGatheringChange========")
-
         }
 
         override fun onIceCandidate(p0: IceCandidate?) {
             Log.i(TAG, "=========onIceCandidate========")
-
         }
 
         override fun onIceCandidatesRemoved(p0: Array<out IceCandidate>?) {
             Log.i(TAG, "=========onIceCandidatesRemoved========")
-
         }
 
         override fun onAddStream(mediaStream: MediaStream?) {
             Log.i(TAG, "=========onAddStream========" + mediaStream?.id)
 
+            val remoteVideoTrack = mediaStream?.videoTracks?.get(0)
+
+            remoteVideoTrack?.setEnabled(true)
+
+            remoteVideoTrack?.addSink(surfaceView)
         }
 
         override fun onRemoveStream(p0: MediaStream?) {

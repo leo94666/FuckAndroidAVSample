@@ -1,3 +1,3 @@
 package com.top.av.webrtc
 
-val TAG = "WebRTCClientWebRTCClientWebRTCClient"
+val TAG = "WebRTCClientWebRTCClient"
