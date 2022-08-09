@@ -1,5 +1,7 @@
 package com.top.av.ui
 
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.View
 import com.google.gson.Gson
@@ -14,6 +16,14 @@ import org.webrtc.SessionDescription
 import java.io.IOException
 
 class WebRTCActivity : BaseActivity<ActivityWebRtcBinding>() {
+
+    companion object {
+        fun start(context: Context) {
+            val intent = Intent(context, WebRTCActivity::class.java)
+            context.startActivity(intent)
+        }
+    }
+
 
     override fun init(root: View?) {
 

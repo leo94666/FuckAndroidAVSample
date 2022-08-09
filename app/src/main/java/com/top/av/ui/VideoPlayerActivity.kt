@@ -31,6 +31,10 @@ class VideoPlayerActivity:BaseActivity<ActivityVideoPlayerBinding>() {
         mDataBinding.btnExoPlayer.setOnClickListener {
             ExoPlayerActivity.start(this)
         }
+
+        mDataBinding.btnZlmWebrtcPlayer.setOnClickListener {
+            ExoPlayerActivity.start(this)
+        }
     }
 
     override fun hideTitleBar() {
