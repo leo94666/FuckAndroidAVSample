@@ -33,7 +33,7 @@ class VideoPlayerActivity:BaseActivity<ActivityVideoPlayerBinding>() {
         }
 
         mDataBinding.btnZlmWebrtcPlayer.setOnClickListener {
-            ExoPlayerActivity.start(this)
+            WebRTCActivity.start(this)
         }
     }
 
